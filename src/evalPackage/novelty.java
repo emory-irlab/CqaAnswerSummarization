@@ -2,7 +2,6 @@ package evalPackage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class novelty {
 	static double beta = 0.5;
@@ -10,22 +9,21 @@ public class novelty {
 	{
 		ArrayList<Double> scores = new ArrayList<>();
 		ArrayList<int[]> nuggets = new ArrayList<>();
-		int[] t = new int[]{4,2,1,2,2};		
-		for(int i=0; i<5;i++)
+		int[] t = new int[]{2,1,1,0,2,1,1,1,0,0};		
+		for(int i=0; i<10;i++)
 		{
 			scores.add((double)t[i]);
 		}
-		nuggets.add(new int[]{0,1,0,1,0,0,1,0,1});//a
-		nuggets.add(new int[]{0,1,0,0,0,0,0,1,0});//b
-		nuggets.add(new int[]{0,1,0,0,0,0,0,0,0});//c
-		nuggets.add(new int[]{0,0,1,0,1,0,0,0,0});//d
-		nuggets.add(new int[]{1,0,0,0,0,1,0,0,0});//e
-		//nuggets.add(new int[]{1,0,0,0,0,0,0,0,0});//f
-		//nuggets.add(new int[]{0,0,1,0,0,0,0,0,0});//g
-		//nuggets.add(new int[]{1,0,0,0,0,0,0,0,0});//h
-		//nuggets.add(new int[]{0,0,0,0,0,0,0,0,0});//i
-		//nuggets.add(new int[]{0,0,0,0,0,0,0,0,0});//j
-		//nuggets.add(new int[]{0,0,0,0,0,0,0,0,1});//j
+		nuggets.add(new int[]{0,1,0,1,0,0});//a
+		nuggets.add(new int[]{0,1,0,0,0,0});//b
+		nuggets.add(new int[]{0,1,0,0,0,0});//c
+		nuggets.add(new int[]{0,0,0,0,0,0});//d
+		nuggets.add(new int[]{1,0,0,0,0,1});//e
+		nuggets.add(new int[]{1,0,0,0,0,0});//f
+		nuggets.add(new int[]{0,0,1,0,0,0});//g
+		nuggets.add(new int[]{1,0,0,0,0,0});//h
+		nuggets.add(new int[]{0,0,0,0,0,0});//i
+		nuggets.add(new int[]{0,0,0,0,0,0});//j
 		
 		double nol = noveltyMetric(scores, nuggets);
 		//double nol = noveltyCost(scores, nuggets,0.5);

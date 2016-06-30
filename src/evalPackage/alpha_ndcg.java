@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class alpha_ndcg {
-	static double alpha = 0;
+	static double alpha = 0.5;
 	
-/*	public static void main(String[] args)//test case
+	public static void main(String[] args)//test case
 	{
 		ArrayList<Double> scores = new ArrayList<>();
 		ArrayList<int[]> nuggets = new ArrayList<>();
@@ -27,7 +27,7 @@ public class alpha_ndcg {
 		nuggets.add(new int[]{0,0,0,0,0,0});//j
 		double dcg = alphandcg(scores, nuggets, 9);
 		System.out.println(dcg);
-	}*/
+	}
 	
 	public static double alphandcg(ArrayList<Double> scores, ArrayList<int[]> nuggets, int m)
 	{

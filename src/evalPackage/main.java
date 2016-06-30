@@ -31,8 +31,9 @@ public class main {
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\output.txt";
-	static double alpha = 0.5;
+	
 	public static void main(String[] args) throws IOException {
+		//out put file
 		File outfile = new File(outFile);
 		if(outfile.exists())
 		{
@@ -40,39 +41,40 @@ public class main {
 			outfile.delete();
 		}
 		System.out.println("buiding new file");
-  	try{
-  		outfile.createNewFile();
-  	}catch (IOException e){e.printStackTrace();}            	  
-      FileWriter ps = new FileWriter(outfile, true);		
-		
-		
+	  	try{
+	  		outfile.createNewFile();
+	  	}catch (IOException e){e.printStackTrace();}            	  
+	    FileWriter ps = new FileWriter(outfile, true);		
+			
+		//read file	
 		String rw = readJsonFile(rawDataSet);
 		String prop = readJsonFile(clustersProp);
-		
+		//process	
 		JSONParser parser = new JSONParser();
-      try {
-      	Object obj = parser.parse(rw);
-      	Object pro = parser.parse(prop);
+        try {
+	      	Object obj = parser.parse(rw);
+	      	Object pro = parser.parse(prop);
+	          
+	      	JSONObject jsonObject = (JSONObject) obj;
+	      	JSONObject jsonPropos = (JSONObject) pro;
+	          
+	      	Object questions_obj = jsonObject.get("questions");
+	      	Object questions_pro = jsonPropos.get("questions");            
           
-      	JSONObject jsonObject = (JSONObject) obj;
-      	JSONObject jsonPropos = (JSONObject) pro;
+            JSONArray qArray = (JSONArray)questions_obj;
+            JSONArray cArray = (JSONArray)questions_pro;
           
-      	Object questions_obj = jsonObject.get("questions");
-      	Object questions_pro = jsonPropos.get("questions");            
-          
-          JSONArray qArray = (JSONArray)questions_obj;
-          JSONArray cArray = (JSONArray)questions_pro;
-          
-          ArrayList<Double> scores = new ArrayList<>();
+            ArrayList<Double> scores = new ArrayList<>();
           
           //for each question -- identified by question id
-          for(int i=0; i<qArray.size(); i++){
-          	JSONObject question = (JSONObject)qArray.get(i); 
+            for(int i=0; i<qArray.size(); i++){
+            	JSONObject question = (JSONObject)qArray.get(i); 
           	/* question:
-          	 * 0. answers	 * 1. question_timestamp   	 * 2. title	 * 3. body    	 * 4. question_id */ 
+          	 * 0. answers	 * 1. question_timestamp   	 * 2. title	 * 3. body    	 * 4. question_id 
+          	 * */ 
           	Object answers = question.get("answers");
-//          	Object title = question.get("title");
-//          	Object body = question.get("body");
+//          Object title = question.get("title");
+//          Object body = question.get("body");
           	Object question_id = question.get("question_id");
           	
           	//find its cluster
@@ -199,10 +201,7 @@ public class main {
 	public static double average_eval(ArrayList<Double> scores)
 	{
 		double sum = 0;
-		for(double score: scores)
-		{
-			sum += score;
-		}
+		for(double score: scores)	sum += score;
 		return sum/(double)scores.size();
 	}
 }
