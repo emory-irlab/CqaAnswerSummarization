@@ -6,6 +6,29 @@ import java.util.LinkedList;
 public class alpha_ndcg {
 	static double alpha = 0;
 	
+/*	public static void main(String[] args)//test case
+	{
+		ArrayList<Double> scores = new ArrayList<>();
+		ArrayList<int[]> nuggets = new ArrayList<>();
+		int[] t = new int[]{2,1,1,0,2,1,1,1,0,0};		
+		for(int i=0; i<10;i++)
+		{
+			scores.add((double)t[i]);
+		}
+		nuggets.add(new int[]{0,1,0,1,0,0});//a
+		nuggets.add(new int[]{0,1,0,0,0,0});//b
+		nuggets.add(new int[]{0,1,0,0,0,0});//c
+		nuggets.add(new int[]{0,0,0,0,0,0});//d
+		nuggets.add(new int[]{1,0,0,0,0,1});//e
+		nuggets.add(new int[]{1,0,0,0,0,0});//f
+		nuggets.add(new int[]{0,0,1,0,0,0});//g
+		nuggets.add(new int[]{1,0,0,0,0,0});//h
+		nuggets.add(new int[]{0,0,0,0,0,0});//i
+		nuggets.add(new int[]{0,0,0,0,0,0});//j
+		double dcg = alphandcg(scores, nuggets, 9);
+		System.out.println(dcg);
+	}*/
+	
 	public static double alphandcg(ArrayList<Double> scores, ArrayList<int[]> nuggets, int m)
 	{
 		double dcg = alpha_dcg(scores, nuggets, m);
