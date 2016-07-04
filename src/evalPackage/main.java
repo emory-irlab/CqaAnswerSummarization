@@ -164,7 +164,7 @@ public class main {
           	ArrayList<int[]> random_negguts = new ArrayList<>();
           	for(int x=0;x<rate.size();x++)  temp.add(x);
           	
-      		Random rn = new Random(i);
+      		Random rn = new Random();
       		for(int x=rate.size(); x>0;x--)
       		{			
       			int r = rn.nextInt(x);

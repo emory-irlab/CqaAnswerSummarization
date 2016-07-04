@@ -26,23 +26,28 @@ public class novelty {
 		nuggets.add(new int[]{0,0,0,0,0,0});//j
 		
 		double nol = noveltyMetric(scores, nuggets);
-		//double nol = noveltyCost(scores, nuggets,0.5);
+		//double nol = noveltyCost(scores, nuggets,0.2);
 		System.out.println(nol);
 	}
 	public static double noveltyMetric(ArrayList<Double> scores, ArrayList<int[]> nuggets)
 	{
 		double result = 0;
 		for(int i=1; i<=10; i++)
-			result += normNoveltyCost(scores, nuggets, (double)i/10.0);
+		{
+			double xx = normNoveltyCost(scores, nuggets, (double)i/10.0);
+			result += xx;
+			//System.out.println(xx);
+		}
 		return result/10.0;
 	}
 	public static double normNoveltyCost(ArrayList<Double> scores, ArrayList<int[]> nuggets, double r)
 	{
 		double minCost = minNoveltyCost(scores, nuggets, r);
 		double cost = noveltyCost(scores, nuggets, r);
+		System.out.println(minCost+", "+cost);
 		return minCost/cost;
 	}
-	public static double minNoveltyCost(ArrayList<Double> scores, ArrayList<int[]> nuggets, double r)
+/*	public static double minNoveltyCost(ArrayList<Double> scores, ArrayList<int[]> nuggets, double r)
 	{
 		int numOfAns = scores.size();
 		int numOfAsp = nuggets.get(0).length;
@@ -68,6 +73,60 @@ public class novelty {
 				if(newAsp/allAsp>max)
 				{
 					max = newAsp/allAsp;
+					nxt = j;
+				}
+				//System.out.println("r="+r+"; "+"j="+j+", "+newAsp+", "+allAsp);
+			}
+			double totalAsp = scores_t.remove(nxt);
+			int[] nxtNugget = nuggets_t.remove(nxt);
+			//System.out.println("choose: "+nxt);
+			if(totalAsp!=0)
+			{
+				double newAsp=0;
+				for(int l=0;l<nxtNugget.length;l++)
+				{
+					if(nxtNugget[l]!=0 && exist[l]==false)
+					{
+						exist[l]=true;
+						sumAsp++;
+						newAsp++;
+					}
+				}
+				cost += 1+beta*(1-newAsp/totalAsp);
+			}			
+			if(sumAsp/(double)numOfAsp>=r) break;
+		}
+		//System.out.println(r+", "+cost);
+
+		return cost;
+	}*/
+	public static double minNoveltyCost(ArrayList<Double> scores, ArrayList<int[]> nuggets, double r)
+	{
+		int numOfAns = scores.size();
+		int numOfAsp = nuggets.get(0).length;
+		double cost=0;
+		ArrayList<Double> scores_t = new ArrayList<>(scores);
+		ArrayList<int[]> nuggets_t = new ArrayList<>(nuggets);
+		boolean[] exist = new boolean[numOfAsp];
+		Arrays.fill(exist, false);
+		double sumAsp = 0;
+		for(int i=0; i<numOfAns;i++)
+		{
+			double max = 0;	
+			int nxt = 0;
+			for(int j=0; j<scores_t.size();j++)
+			{
+				int[] curNugget = nuggets_t.get(j);
+				double newAsp = 0;
+				double allAsp = scores_t.get(j);
+				for(int k=0; k<numOfAsp; k++)
+					if(curNugget[k]!=0 && exist[k]==false) 
+						newAsp++;
+				//if(newAsp/allAsp>max)
+				if(newAsp>max)
+				{
+					//max = newAsp/allAsp;
+					max = newAsp;
 					nxt = j;
 				}
 				//System.out.println("r="+r+"; "+"j="+j+", "+newAsp+", "+allAsp);
