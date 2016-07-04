@@ -2,6 +2,8 @@ package evalPackage;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import org.apache.lucene.analysis.TokenStream;
@@ -30,13 +32,17 @@ public class ranking {
 		alength = new int[as.length];
 		answerList = new ArrayList<>();
 	}
-	public static void aBM25() throws IOException
+	public static int[] aBM25() throws IOException
 	{
+		int len = answers.length;
 		parseAll();
-		double[] scores = new double[answers.length];
+		int[] order = new int[len];
+		double[] scores = new double[len];
 		double avgdl = avgdl();
-		for(int i=0;i<answers.length;i++)
+		for(int i=0;i<len;i++)
 			scores[i] = bm25Similarity(qMap, answerList.get(i), alength[i], avgdl);
+		
+		return getOrder(scores);
 	}
 	public static void parseAll() throws IOException
 	{
@@ -98,13 +104,31 @@ public class ranking {
 
 	public static double avgdl()
 	{
-		double avg = 0;
 		int total = 0;
 		for(int i=0;i<alength.length;i++)
 			total += alength[i];
-		avg = (double)total/alength.length;
-		return avg;
+		return (double)total/alength.length;
 	}
-	
+	public static int[] getOrder(double[] scores)
+	{
+		int[] result = new int[scores.length];
+		ArrayList<double[]> pair = new ArrayList<>();
+		for(int i=0; i<scores.length; i++)
+		{
+			double[] tmp = new double[]{scores[i], (double)i};
+			pair.add(tmp);
+		}
+		
+		Collections.sort(pair, new Comparator<double[]>(){
+			@Override
+			public int compare(double[] a, double[] b) {
+				return (b[0]-a[0])>0?1:-1;
+			}
+		});
+		
+		for(int i=0; i<scores.length; i++)
+			result[i] = (int) pair.get(i)[1];
+		return result;
+	}
 
 }
