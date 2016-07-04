@@ -12,9 +12,8 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 public class myBM25 {
-	static int qlength;
-	static int[] alength;
-	
+	static String question;
+	static String[] answers;
 	static int qlength;
 	static int[] alength;
 	
