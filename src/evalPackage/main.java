@@ -1,23 +1,15 @@
 package evalPackage;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.Random;
 
-import javax.json.*;
+/*import javax.json.*;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
-import javax.json.stream.JsonParser.Event;
+import javax.json.stream.JsonParser.Event;*/
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -32,49 +24,31 @@ public class main {
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\output.txt";
 	
-	public static void main(String[] args) throws IOException {
-		//out put file
-		File outfile = new File(outFile);
-		if(outfile.exists())
-		{
-			System.out.println("deleting...");
-			outfile.delete();
-		}
-		System.out.println("buiding new file");
-	  	try{
-	  		outfile.createNewFile();
-	  	}catch (IOException e){e.printStackTrace();}            	  
-	    FileWriter ps = new FileWriter(outfile, true);		
+	public static void main(String[] args) throws IOException{
+		/**********************out put file******************************/           	  
+	    FileWriter ps = write_out(outFile);	
 			
-		//read file	
-		String rw = readJsonFile(rawDataSet);
-		String prop = readJsonFile(clustersProp);
-		//process	
+		/***********************read file**********************************/	
+		String rw = readJasonFile.readFile(rawDataSet);
+		String prop = readJasonFile.readFile(clustersProp);
+		
+		/**********************process************************************/	
 		JSONParser parser = new JSONParser();
         try {
-	      	Object obj = parser.parse(rw);
-	      	Object pro = parser.parse(prop);
-	          
-	      	JSONObject jsonObject = (JSONObject) obj;
-	      	JSONObject jsonPropos = (JSONObject) pro;
-	          
-	      	Object questions_obj = jsonObject.get("questions");
-	      	Object questions_pro = jsonPropos.get("questions");            
+	      	JSONObject jsonObject = (JSONObject) parser.parse(rw);
+	      	JSONObject jsonPropos = (JSONObject) parser.parse(prop);          
           
-            JSONArray qArray = (JSONArray)questions_obj;
-            JSONArray cArray = (JSONArray)questions_pro;
+            JSONArray qArray = (JSONArray)jsonObject.get("questions");
+            JSONArray cArray = (JSONArray)jsonPropos.get("questions"); 
           
-            ArrayList<Double> scores = new ArrayList<>();
-          
-          //for each question -- identified by question id
+            ArrayList<Double> scores = new ArrayList<>();          
+            //for each question -- identified by question id
             for(int i=0; i<qArray.size(); i++){
             	JSONObject question = (JSONObject)qArray.get(i); 
           	/* question:
           	 * 0. answers	 * 1. question_timestamp   	 * 2. title	 * 3. body    	 * 4. question_id 
           	 * */ 
-          	Object answers = question.get("answers");
-//          Object title = question.get("title");
-//          Object body = question.get("body");
+            JSONArray answers = (JSONArray)question.get("answers");
           	Object question_id = question.get("question_id");
           	
           	//find its cluster
@@ -82,7 +56,6 @@ public class main {
           	for(k=0; k<cArray.size(); k++)
           	{
           		JSONObject proposition = (JSONObject)cArray.get(k); 
-          		//System.out.println(proposition.get("question_id"));
           		if(proposition.get("question_id").equals(question_id)) break;
           	}
           	JSONObject prop_group = (JSONObject)cArray.get(k);
@@ -90,15 +63,13 @@ public class main {
           	/* answers: 
           	 * 0. answer_text  * 1. is_best_answer  * 2. thumbs_down   
           	 * 3. answer_sources(optional)  * 4. answer_timestamp  * 5. thumbs_up
-          	 * */
-          	JSONArray ans = (JSONArray)answers;
+          	 * */          	
           	ArrayList<Double> rate = new ArrayList<>();
           	ArrayList<int[]> nuggets = new ArrayList<>();
           	int[] maxProp = new int[cluster.size()];//used to store #propositions in each aspect
-          	for(int j=0; j<ans.size();j++)//every answer for each question
+          	for(int j=0; j<answers.size();j++)//every answer for each question
           	{
-      			JSONObject answer = (JSONObject)ans.get(j); 
-      			//System.out.println(answer.get("answer_text"));   
+      			JSONObject answer = (JSONObject)answers.get(j);   
       			Object atxt = answer.get("answer_text");
       			int count = 0;
       			int[] nvlty = new int[cluster.size()];
@@ -140,24 +111,14 @@ public class main {
       			rate.add((double)count);
       			nuggets.add(nvlty);
       			
-//      			ps.append(question_id.toString()+'\t'+ count+": ");
-//      			for(int x: nvlty)
-//      			{
-//      				ps.append(x+", ");
-//      			}
-//      			ps.append("\n");
-      			
-      			
+      			/*ps.append(question_id.toString()+'\t'+ count+": ");
+      			for(int x: nvlty) ps.append(x+", ");
+      			ps.append("\n");*/ 
           	}
-//          	ps.append("Summery: ");
-//  			for(int x: maxProp)
-//  			{
-//  				ps.append(x+", ");
-//  			}
-//  			ps.append("\n");
-  			
-          	//double score = eval_ndcg_random(rate);
-  			//scores.add(score);
+          	/*ps.append("Summery: ");
+  			for(int x: maxProp) ps.append(x+", ");
+  			ps.append("\n");
+  			*/
           	/***************random*******************/
           	ArrayList<Integer> temp = new ArrayList<>();
           	ArrayList<Double> random_rate = new ArrayList<>();
@@ -171,9 +132,7 @@ public class main {
       			int nxt = temp.remove(r);
       			random_rate.add(rate.get(nxt));
       			random_negguts.add(nuggets.get(nxt));
-      			//System.out.print(nxt+", ");
       		}
-      		//System.out.println();
       		/***************random*******************/
       		
       		/****alpha-ndcg******/
@@ -202,30 +161,21 @@ public class main {
       ps.close();
       System.out.println("finishied!");
 	}
-	public static String readJsonFile(String Path){
-		StringBuilder sb = new StringBuilder();
-		BufferedReader br = null;
-		try{
-			FileInputStream file = new FileInputStream(Path);
-			InputStreamReader sr = new InputStreamReader(file, "UTF-8");
-			br = new BufferedReader(sr);
-			String line = null;
-			while((line = br.readLine())!= null){
-				sb.append(line);
-			}
-			br.close();
-		}catch(IOException e){
-			e.printStackTrace();
-		}finally{
-			if(br != null){
-				try{
-					br.close();
-				}catch(IOException e){
-					e.printStackTrace();
-				}
-			}
-		}		
-		return sb.toString();
+
+	public static FileWriter write_out(String Path) throws IOException
+	{
+		File outfile = new File(Path);
+		if(outfile.exists())
+		{
+			System.out.println("deleting...");
+			outfile.delete();
+		}
+		System.out.println("buiding new file");
+	  	try{
+	  		outfile.createNewFile();
+	  	}catch (IOException e){e.printStackTrace();}            	  
+	    FileWriter ps = new FileWriter(outfile, true);	
+	    return ps;
 	}
 	
 	public static double average_eval(ArrayList<Double> scores)
