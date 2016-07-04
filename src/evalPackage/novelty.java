@@ -92,6 +92,7 @@ public class novelty {
 			if(sumAsp/(double)numOfAsp>=r) break;
 		}
 		//System.out.println(r+", "+cost);
+
 		return cost;
 	}
 	public static double noveltyCost(ArrayList<Double> scores, ArrayList<int[]> nuggets, double r)
@@ -169,29 +170,26 @@ public class novelty {
 		return result;
 	}
 	/*
-	public static List<List<Integer>> permute(int n) {
+	public static void permute(int n) {
         List<List<Integer>> result = new ArrayList<>();
         ArrayList<Integer> elements = new ArrayList<>();
         
-        for(int i=0; i<n; i++)
-        {
-            elements.add(i);
-        }
+        for(int i=0; i<n; i++) elements.add(i);
         for(int i=0; i<n; i++)
         {
             ArrayList<Integer> prefix = new ArrayList<>();
             ArrayList<Integer> remain = new ArrayList<>(elements);
             prefix.add(i);
             remain.remove(i);
-            permute_b(prefix,remain,result);
+            permute_b(prefix,remain);
         }
-        return result;
     }
-    private static void permute_b(ArrayList<Integer> prefix, ArrayList<Integer> remain, List<List<Integer>> result)
+   // private static void permute_b(ArrayList<Integer> prefix, ArrayList<Integer> remain, List<List<Integer>> result)
+    private static void permute_b(ArrayList<Integer> prefix, ArrayList<Integer> remain)
     {
         if(remain.size() == 0)
         {
-            result.add(prefix);
+            //result.add(prefix);
             return;
         }
         else
@@ -202,7 +200,7 @@ public class novelty {
                 ArrayList<Integer> rem = new ArrayList<>(remain);
                 pri.add(remain.get(i));
                 rem.remove(i);
-                permute_b(pri,rem,result);
+                permute_b(pri,rem);
             }
         }
     }*/

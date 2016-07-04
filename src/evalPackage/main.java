@@ -94,6 +94,7 @@ public class main {
           	JSONArray ans = (JSONArray)answers;
           	ArrayList<Double> rate = new ArrayList<>();
           	ArrayList<int[]> nuggets = new ArrayList<>();
+          	int[] maxProp = new int[cluster.size()];//used to store #propositions in each aspect
           	for(int j=0; j<ans.size();j++)//every answer for each question
           	{
       			JSONObject answer = (JSONObject)ans.get(j); 
@@ -101,33 +102,60 @@ public class main {
       			Object atxt = answer.get("answer_text");
       			int count = 0;
       			int[] nvlty = new int[cluster.size()];
+      			
       			for(int m=0; m<cluster.size();m++)//for every aspect in the cluster
       			{
       				JSONArray aspect = (JSONArray)cluster.get(m);
+      				int flag = 0;
+      				maxProp[m] = aspect.size();
       				for(int n=0; n<aspect.size();n++)//for every prop in an aspect     				
       				{
-      					String text = atxt.toString();
-      					Object p = aspect.get(n);
-      					if(text.contains(p.toString()))
+      					String text = atxt.toString().trim();
+      					/*******need some process********/
+      					StringBuilder tmps = new StringBuilder();
+      					char pre = 'a';
+      					char cur;
+      					for(int x=0; x<text.length();x++)
       					{
-      						count++;
-      						nvlty[m] = 1;
-      						break;
+      						cur = text.charAt(x);
+      						if(cur=='\n') tmps.append(" ");
+      						else if(cur==' ' && pre==' ') continue;
+      						else tmps.append(cur);
+      						pre = cur;
+      					}
+      					text = tmps.toString().toLowerCase();
+      					/*******need some process********/
+      					Object p = aspect.get(n);
+      					if(text.contains(p.toString().trim().toLowerCase()))//TBD
+      					{
+      						if(flag==0)	
+      						{
+      							count++;
+      							flag=1;
+      						}
+      						nvlty[m] += 1;
       					}
       				}
       			}
       			rate.add((double)count);
       			nuggets.add(nvlty);
-      			/*
-      			ps.append(question_id.toString()+'\t'+ count+": ");
-      			for(int x: nvlty)
-      			{
-      				ps.append(x+", ");
-      			}
-      			ps.append("\n");
-      			*/
+      			
+//      			ps.append(question_id.toString()+'\t'+ count+": ");
+//      			for(int x: nvlty)
+//      			{
+//      				ps.append(x+", ");
+//      			}
+//      			ps.append("\n");
+      			
       			
           	}
+//          	ps.append("Summery: ");
+//  			for(int x: maxProp)
+//  			{
+//  				ps.append(x+", ");
+//  			}
+//  			ps.append("\n");
+  			
           	//double score = eval_ndcg_random(rate);
   			//scores.add(score);
           	/***************random*******************/
@@ -136,7 +164,7 @@ public class main {
           	ArrayList<int[]> random_negguts = new ArrayList<>();
           	for(int x=0;x<rate.size();x++)  temp.add(x);
           	
-      		Random rn = new Random();
+      		Random rn = new Random(i);
       		for(int x=rate.size(); x>0;x--)
       		{			
       			int r = rn.nextInt(x);
@@ -149,16 +177,16 @@ public class main {
       		/***************random*******************/
       		
       		/****alpha-ndcg******/
-          	double score = alpha_ndcg.alphandcg(random_rate, random_negguts, rate.size()-1);
+          	//double score = alpha_ndcg.alphandcg(random_rate, random_negguts, rate.size()-1);
           	
           	/****err-ia*******/
-      		//double score = err_ia.err_Intent(random_rate, random_negguts);
+      		double score = err_ia.nerr(random_rate, random_negguts, maxProp);
           	
           	/***novelty-focused***/
       		//double score = novelty.noveltyMetric(random_rate, random_negguts);
           	
           	scores.add(score);
-          	//System.out.println(question_id.toString()+ score);
+          	System.out.println(question_id.toString()+ score);
   			ps.append(question_id.toString()+'\t'+ score+"\n");
           }
           double aveg = average_eval(scores);
