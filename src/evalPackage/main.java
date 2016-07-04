@@ -180,11 +180,13 @@ public class main {
           	//double score = alpha_ndcg.alphandcg(random_rate, random_negguts, rate.size()-1);
           	
           	/****err-ia*******/
-      		double score = err_ia.nerr(random_rate, random_negguts, maxProp);
+      		//double score = err_ia.nerr(random_rate, random_negguts, maxProp);
           	
           	/***novelty-focused***/
       		//double score = novelty.noveltyMetric(random_rate, random_negguts);
           	
+      		/***novelty-focused***/
+      		double score = support.supportMetric(random_rate, random_negguts);
           	scores.add(score);
           	System.out.println(question_id.toString()+ score);
   			ps.append(question_id.toString()+'\t'+ score+"\n");
