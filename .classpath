@@ -5,5 +5,26 @@
 	<classpathentry kind="lib" path="E:/CScourse/summer_project/code/javax.json-api-1.0.jar"/>
 	<classpathentry kind="lib" path="E:/CScourse/summer_project/code/javax.json-api-1.0-javadoc.jar"/>
 	<classpathentry kind="lib" path="E:/CScourse/summer_project/code/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/ejml-0.23.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/ejml-0.23-src.zip"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/javax.json.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/javax.json-api-1.0-sources.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/joda-time.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/joda-time-2.9-sources.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/jollyday.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/jollyday-0.4.7-sources.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/protobuf.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/slf4j-api.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/slf4j-simple.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/stanford-corenlp-3.6.0.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/stanford-corenlp-3.6.0-javadoc.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/stanford-corenlp-3.6.0-models.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/stanford-corenlp-3.6.0-sources.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/xom.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/stanford-corenlp-full-2015-12-09/xom-1.2.10-src.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/code/lucene-6.0.1/analysis/common/lucene-analyzers-common-6.0.1.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/code/lucene-6.0.1/core/lucene-core-6.0.1.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/code/lucene-6.0.1/demo/lucene-demo-6.0.1.jar"/>
+	<classpathentry kind="lib" path="E:/CScourse/summer_project/code/lucene-6.0.1/queryparser/lucene-queryparser-6.0.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
