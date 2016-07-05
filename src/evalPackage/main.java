@@ -130,7 +130,7 @@ public class main {
           	/***************ranking*******************/
           	//int[] order = ranking.random(questionString, allAnswers, 1);//random
           	//int[] order = ranking.bm25(questionString, allAnswers);//bm25
-          	int[] order = ranking.mmr(questionString, allAnswers, 0.8);//bm25
+          	int[] order = ranking.mmr(questionString, allAnswers, 0.95);//bm25
       		for(int x=0; x<rate.size();x++)
       		{
       			random_rate.add(rate.get(order[x]));
