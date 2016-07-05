@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.en.PorterStemFilter;
@@ -44,6 +45,48 @@ public class myBM25 {
 		
 		return getOrder(scores);
 	}
+	
+	public static int[] mmr_bm25based(double lamda) throws IOException
+	{
+		int len = answers.length;
+		parseAll();
+		LinkedList<Integer> selected = new LinkedList<>();
+		LinkedList<Integer> unselect = new LinkedList<>();
+		for(int i=0; i<len;i++) unselect.add(i);
+		double avgdl = avgdl();
+		
+		while(!unselect.isEmpty())
+		{
+			double maxDiScore = 0;
+			int maxDi = 0;
+			for(int i=0; i<unselect.size();i++)
+			{
+				int curInd = unselect.get(i);
+				double qaSim = bm25Similarity(qMap, answerList.get(curInd), alength[curInd],avgdl);
+				
+				double max = 0;
+				for(int j=0; j<selected.size();j++)
+				{
+					int tmpInd = selected.get(j);
+					max = Math.max(max, bm25Similarity(answerList.get(tmpInd),answerList.get(curInd), alength[tmpInd], avgdl));
+				}
+				double mSim = lamda*(qaSim-(1-lamda)*max);
+				if(mSim > maxDiScore)
+				{
+					maxDiScore = mSim;
+					maxDi = i;
+				}			
+			}
+			int tmp = unselect.remove(maxDi);
+			selected.add(tmp);		
+		}
+		int[] order = new int[len];
+		for(int i=0; i<len; i++)
+			order[i] = selected.get(i);
+		
+		return order;
+	}
+	
 	public static void parseAll() throws IOException
 	{
 		qlength = parse(question, qMap);
@@ -54,13 +97,7 @@ public class myBM25 {
 			answerList.add(aMap);
 		}
 	}
-/*	public static void main() throws IOException
-	{
-		String q = "I would like to lose 50 lbs in 3 months? how can I do this can someone tell me things to do at the gym and of any diets that work or the foods to eat. I would like to look good by my birthday. I'm 6' and weigh 230 50 lbs less is average I think";
-		HashMap<String, Integer> hm = new HashMap<>();
-		int t = parse(q, hm);
-		System.out.println(t);
-	}*/
+
 	public static int parse(String line, HashMap<String, Integer> an) throws IOException//return #words of string
 	{
 		StandardAnalyzer analyzer = new StandardAnalyzer();

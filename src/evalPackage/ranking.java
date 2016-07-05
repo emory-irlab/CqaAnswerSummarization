@@ -26,4 +26,9 @@ public class ranking {
 			order[i++] = temp.remove(rn.nextInt(x));
 		return order;
 	}
+	public static int[] mmr(String question, String[] anwsers, double lamda) throws IOException
+	{
+		myBM25 rk = new myBM25(question, anwsers);
+		return rk.mmr_bm25based(lamda);
+	}
 }
