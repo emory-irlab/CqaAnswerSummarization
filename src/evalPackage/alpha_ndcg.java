@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 public class alpha_ndcg {
-	static double alpha = 0;
+	static double alpha = 1;
 	static double maxdcg = 0;
 	/*public static void main(String[] args)//test case
 	{
@@ -30,6 +30,7 @@ public class alpha_ndcg {
 		System.out.println(dcg);
 	}
 	*/
+	
 	public static double alphandcg(ArrayList<Double> scores, ArrayList<int[]> nuggets, int m)
 	{
 		double dcg = alpha_dcg(scores, nuggets, m);

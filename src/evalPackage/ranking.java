@@ -13,14 +13,14 @@ public class ranking {
 		return rk.aBM25();
 	}
 
-	public static int[] random(String question, String[] anwsers)
+	public static int[] random(String question, String[] anwsers, int seed)
 	{
 		int[] order = new int[anwsers.length];
 		
 		ArrayList<Integer> temp = new ArrayList<>();
 		for(int x=0;x<anwsers.length;x++)  temp.add(x);
 		
-		Random rn = new Random();
+		Random rn = new Random(seed);
 		int i=0;
 		for(int x=anwsers.length; x>0;x--)
 			order[i++] = temp.remove(rn.nextInt(x));

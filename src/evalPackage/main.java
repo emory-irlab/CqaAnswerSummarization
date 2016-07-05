@@ -50,7 +50,10 @@ public class main {
           	 * */ 
             JSONArray answers = (JSONArray)question.get("answers");
           	Object question_id = question.get("question_id");
-          	
+          	//forming query
+          	String title = question.containsKey("title")?question.get("title").toString():"";
+          	String body = question.containsKey("body")?question.get("body").toString():"";
+          	String questionString = title+" "+body;
           	//find its cluster
           	int k;
           	for(k=0; k<cArray.size(); k++)
@@ -67,10 +70,12 @@ public class main {
           	ArrayList<Double> rate = new ArrayList<>();
           	ArrayList<int[]> nuggets = new ArrayList<>();
           	int[] maxProp = new int[cluster.size()];//used to store #propositions in each aspect
+          	String[] allAnswers = new String[answers.size()];
           	for(int j=0; j<answers.size();j++)//every answer for each question
           	{
       			JSONObject answer = (JSONObject)answers.get(j);   
-      			Object atxt = answer.get("answer_text");
+      			String atxt = answer.get("answer_text").toString();
+      			allAnswers[j] = atxt;
       			int count = 0;
       			int[] nvlty = new int[cluster.size()];
       			
@@ -81,7 +86,7 @@ public class main {
       				maxProp[m] = aspect.size();
       				for(int n=0; n<aspect.size();n++)//for every prop in an aspect     				
       				{
-      					String text = atxt.toString().trim();
+      					String text = atxt.trim();
       					/*******need some process********/
       					StringBuilder tmps = new StringBuilder();
       					char pre = 'a';
@@ -119,24 +124,24 @@ public class main {
   			for(int x: maxProp) ps.append(x+", ");
   			ps.append("\n");
   			*/
-          	/***************random*******************/
-          	ArrayList<Integer> temp = new ArrayList<>();
+          	
           	ArrayList<Double> random_rate = new ArrayList<>();
           	ArrayList<int[]> random_negguts = new ArrayList<>();
-          	for(int x=0;x<rate.size();x++)  temp.add(x);
+          	/***************random*******************/
+          	//int seed = 1;
+          	//int[] order = ranking.random(questionString, allAnswers, seed);
+          	//System.out.println(questionString);
+          	int[] order = ranking.bm25(questionString, allAnswers);
+          	/***************bm25*******************/
           	
-      		Random rn = new Random();
-      		for(int x=rate.size(); x>0;x--)
-      		{			
-      			int r = rn.nextInt(x);
-      			int nxt = temp.remove(r);
-      			random_rate.add(rate.get(nxt));
-      			random_negguts.add(nuggets.get(nxt));
+      		for(int x=0; x<rate.size();x++)
+      		{
+      			random_rate.add(rate.get(order[x]));
+      			random_negguts.add(nuggets.get(order[x]));
       		}
-      		/***************random*******************/
       		
       		/****alpha-ndcg******/
-          	//double score = alpha_ndcg.alphandcg(random_rate, random_negguts, rate.size()-1);
+          	double score = alpha_ndcg.alphandcg(random_rate, random_negguts, rate.size()-1);
           	
           	/****err-ia*******/
       		//double score = err_ia.nerr(random_rate, random_negguts, maxProp);
@@ -145,7 +150,7 @@ public class main {
       		//double score = novelty.noveltyMetric(random_rate, random_negguts);
           	
       		/***novelty-focused***/
-      		double score = support.supportMetric(random_rate, random_negguts);
+      		//double score = support.supportMetric(random_rate, random_negguts);
           	scores.add(score);
           	System.out.println(question_id.toString()+ score);
   			ps.append(question_id.toString()+'\t'+ score+"\n");

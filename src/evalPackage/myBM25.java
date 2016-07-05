@@ -14,11 +14,13 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 public class myBM25 {
 	static String question;
 	static String[] answers;
+	
 	static int qlength;
 	static int[] alength;
 	
 	static HashMap<String, Integer> qMap;
 	static ArrayList<HashMap<String, Integer>> answerList;
+	
 	public myBM25(String q, String[] as)
 	{
 		this.question = q;
@@ -27,6 +29,7 @@ public class myBM25 {
 			answers[i] = as[i];
 		alength = new int[as.length];
 		answerList = new ArrayList<>();
+		qMap = new HashMap<>();
 	}
 	
 	public static int[] aBM25() throws IOException
@@ -51,6 +54,13 @@ public class myBM25 {
 			answerList.add(aMap);
 		}
 	}
+/*	public static void main() throws IOException
+	{
+		String q = "I would like to lose 50 lbs in 3 months? how can I do this can someone tell me things to do at the gym and of any diets that work or the foods to eat. I would like to look good by my birthday. I'm 6' and weigh 230 50 lbs less is average I think";
+		HashMap<String, Integer> hm = new HashMap<>();
+		int t = parse(q, hm);
+		System.out.println(t);
+	}*/
 	public static int parse(String line, HashMap<String, Integer> an) throws IOException//return #words of string
 	{
 		StandardAnalyzer analyzer = new StandardAnalyzer();
