@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 public class alpha_ndcg {
-	static double alpha = 0.5;
+	static double alpha = 0;
 	static double maxdcg = 0;
 	/*public static void main(String[] args)//test case
 	{

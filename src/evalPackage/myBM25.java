@@ -62,7 +62,7 @@ public class myBM25 {
 			for(int i=0; i<unselect.size();i++)
 			{
 				int curInd = unselect.get(i);
-				double qaSim = bm25Similarity(qMap, answerList.get(curInd), alength[curInd],avgdl);
+				double qaSim = bm25Similarity(qMap, answerList.get(curInd), alength[curInd], avgdl);
 				
 				double max = 0;
 				for(int j=0; j<selected.size();j++)
@@ -71,7 +71,7 @@ public class myBM25 {
 					max = Math.max(max, bm25Similarity(answerList.get(tmpInd),answerList.get(curInd), alength[tmpInd], avgdl));
 				}
 				double mSim = lamda*(qaSim-(1-lamda)*max);
-				if(mSim > maxDiScore)
+				if(mSim >= maxDiScore)
 				{
 					maxDiScore = mSim;
 					maxDi = i;
