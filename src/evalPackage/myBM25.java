@@ -59,22 +59,23 @@ public class myBM25 {
 		{
 			double maxDiScore = 0;
 			int maxDi = 0;
-			for(int i=0; i<unselect.size();i++)
+			for(int i=0; i<unselect.size();i++)//choose one from the unselected list
 			{
 				int curInd = unselect.get(i);
 				double qaSim = bm25Similarity(qMap, answerList.get(curInd), alength[curInd], avgdl);
 				
-				double max = 0;
+				double max = -1;
 				for(int j=0; j<selected.size();j++)
 				{
 					int tmpInd = selected.get(j);
-					max = Math.max(max, bm25Similarity(answerList.get(tmpInd),answerList.get(curInd), alength[tmpInd], avgdl));
+					//max = Math.max(max, bm25Similarity(answerList.get(tmpInd),answerList.get(curInd), alength[tmpInd], avgdl));
+					max = Math.max(max, bm25Similarity(answerList.get(curInd),answerList.get(tmpInd), alength[tmpInd], avgdl));
 				}
 				double mSim = lamda*(qaSim-(1-lamda)*max);
 				if(mSim >= maxDiScore)
 				{
 					maxDiScore = mSim;
-					maxDi = i;
+					maxDi = i;//index
 				}			
 			}
 			int tmp = unselect.remove(maxDi);
