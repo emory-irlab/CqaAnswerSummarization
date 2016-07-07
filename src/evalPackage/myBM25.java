@@ -64,7 +64,7 @@ public class myBM25 {
 				int curInd = unselect.get(i);
 				double qaSim = bm25Similarity(qMap, answerList.get(curInd), alength[curInd], avgdl);
 				
-				double max = -1;
+				double max = -1;//shouldn't be a problem
 				for(int j=0; j<selected.size();j++)
 				{
 					int tmpInd = selected.get(j);

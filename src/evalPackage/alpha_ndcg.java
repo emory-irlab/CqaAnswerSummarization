@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 public class alpha_ndcg {
-	static double alpha = 0.5;
+	static double alpha = 0;
 	static double maxdcg = 0;
 	/*public static void main(String[] args)//test case
 	{
@@ -46,15 +46,22 @@ public class alpha_ndcg {
 		//alpha gain vector gain[]
 		double[] gain = new double[len];
 		int[] appear = new int[num];
-		for(int i=0; i<len; i++)//certain file
+		for(int i=0; i<len; i++)//a file
 		{
 			int[] judge = nuggets.get(i);
-			for(int j=0; j<num; j++)
-				if(judge[j]!=0)
+			for(int j=0; j<num; j++)//an aspect
+				for(int k=0; k<judge[j]; k++)
 				{
-					gain[i] += judge[j]*Math.pow((1-alpha), appear[j]);
-					appear[j] += judge[j];
-				}			
+					gain[i] += Math.pow((1-alpha), appear[j]);
+					appear[j] += 1;
+				}
+/*				if(judge[j]!=0)
+				{
+//					gain[i] += judge[j]*Math.pow((1-alpha), appear[j]);
+//					appear[j] += judge[j];
+					gain[i] += Math.pow((1-alpha), appear[j]);
+					appear[j] += 1;
+				}	*/		
 		}
 		//cumulative gain vector
 		double[] cgain = new double[len];
@@ -105,9 +112,14 @@ public class alpha_ndcg {
 				double cur = 0;
 				int[] mx = nuggets.get(remain.get(k));
 				for(int j=0; j<num; j++)
-				{
-					cur += (double)mx[j]*Math.pow((1-alpha), appear[j]);
-				}
+					for(int x=0; x<mx[j]; x++)
+					{
+						if(mx[j]!=0) cur += (double)Math.pow((1-alpha), appear[j]);
+					}
+/*				{
+					//cur += (double)mx[j]*Math.pow((1-alpha), appear[j]);
+					if(mx[j]!=0) cur += (double)Math.pow((1-alpha), appear[j]);
+				}*/
 				if(cur>max) 
 				{
 					rec = remain.get(k);
@@ -119,6 +131,7 @@ public class alpha_ndcg {
 			int[] mx = nuggets.get(rec);
 			for(int j=0; j<num; j++)
 				appear[j] += mx[j];
+				//appear[j] += (mx[j]==0?0:1);
 			boolean  xx = remain.remove((Integer)rec);
 			//System.out.println(rec);
 		}

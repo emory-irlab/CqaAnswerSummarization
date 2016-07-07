@@ -23,22 +23,21 @@ public class main {
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\output.txt";
-	
+	static String qAnsFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\qAnsFile.txt";
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
 	    FileWriter ps = write_out(outFile);	
-			
+		FileWriter ps2 = write_out(qAnsFile);	
 		/***********************read file**********************************/	
 		String rw = readJasonFile.readFile(rawDataSet);
-		String prop = readJasonFile.readFile(clustersProp);
-		
+		String prop = readJasonFile.readFile(clustersProp);		
 		/**********************process************************************/	
 		JSONParser parser = new JSONParser();
         try {
-	      	JSONObject jsonObject = (JSONObject) parser.parse(rw);
+	      	JSONObject jsonRawdata = (JSONObject) parser.parse(rw);
 	      	JSONObject jsonPropos = (JSONObject) parser.parse(prop);          
           
-            JSONArray qArray = (JSONArray)jsonObject.get("questions");
+            JSONArray qArray = (JSONArray)jsonRawdata.get("questions");
             JSONArray cArray = (JSONArray)jsonPropos.get("questions"); 
           
             ArrayList<Double> scores = new ArrayList<>();          
@@ -54,6 +53,9 @@ public class main {
           	String title = question.containsKey("title")?question.get("title").toString():"";
           	String body = question.containsKey("body")?question.get("body").toString():"";
           	String questionString = title+" "+body;
+          	
+          	ps2.append("Question: "+'\t'+title+'\t'+body+"\n");
+          	
           	//find its cluster
           	int k;
           	for(k=0; k<cArray.size(); k++)
@@ -71,10 +73,13 @@ public class main {
           	ArrayList<int[]> nuggets = new ArrayList<>();
           	int[] maxProp = new int[cluster.size()];//used to store #propositions in each aspect
           	String[] allAnswers = new String[answers.size()];
+          	
+          	//ArrayList<String> answersContent = new ArrayList<>(); 
           	for(int j=0; j<answers.size();j++)//every answer for each question
           	{
       			JSONObject answer = (JSONObject)answers.get(j);   
       			String atxt = answer.get("answer_text").toString();
+      			//answersContent.add(atxt);
       			allAnswers[j] = atxt;
       			int count = 0;
       			int[] nvlty = new int[cluster.size()];
@@ -128,13 +133,14 @@ public class main {
           	ArrayList<Double> random_rate = new ArrayList<>();
           	ArrayList<int[]> random_negguts = new ArrayList<>();
           	/***************ranking*******************/
-          	//int[] order = ranking.random(questionString, allAnswers, 1);//random
+          	//int[] order = ranking.random(questionString, allAnswers, 4);//random
           	//int[] order = ranking.bm25(questionString, allAnswers);//bm25
-            int[] order = ranking.mmr(questionString, allAnswers, 0.99999);//bm25
+            int[] order = ranking.mmr(questionString, allAnswers, 0.2);//bm25
       		for(int x=0; x<rate.size();x++)
       		{
       			random_rate.add(rate.get(order[x]));
       			random_negguts.add(nuggets.get(order[x]));
+      			ps2.append(x+". "+'\t'+allAnswers[order[x]]+"\n");
       		}
       		/***************evaluation*******************/
           	double score = eval.a_ndcg(random_rate, random_negguts, rate.size()-1);//alpha-ndcg
@@ -155,6 +161,7 @@ public class main {
           e.printStackTrace();
       }
       ps.close();
+      ps2.close();
       System.out.println("finishied!");
 	}
 
