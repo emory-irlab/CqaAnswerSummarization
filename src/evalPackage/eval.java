@@ -7,9 +7,13 @@ public class eval {
 	{
 		return alpha_ndcg.alphandcg(scores, nuggets, k);
 	}
-	public static double err_ia(ArrayList<Double> scores, ArrayList<int[]> nuggets, int[] maxProp)
+	public static double nerr_ia(ArrayList<Double> scores, ArrayList<int[]> nuggets, int[] maxProp)
 	{
 		return err_ia.nerr(scores, nuggets, maxProp);
+	}
+	public static double err_ia(ArrayList<Double> scores, ArrayList<int[]> nuggets, int[] maxProp)
+	{
+		return err_ia.err(scores, nuggets, maxProp);
 	}
 	public static double novelty_focused(ArrayList<Double> scores, ArrayList<int[]> nuggets)
 	{

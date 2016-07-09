@@ -133,9 +133,9 @@ public class main {
           	ArrayList<Double> random_rate = new ArrayList<>();
           	ArrayList<int[]> random_negguts = new ArrayList<>();
           	/***************ranking*******************/
-          	//int[] order = ranking.random(questionString, allAnswers, 4);//random
+          	int[] order = ranking.random(questionString, allAnswers, 4);//random
           	//int[] order = ranking.bm25(questionString, allAnswers);//bm25
-            int[] order = ranking.mmr(questionString, allAnswers, 0.2);//bm25
+            //int[] order = ranking.mmr(questionString, allAnswers, 0.2);//bm25
       		for(int x=0; x<rate.size();x++)
       		{
       			random_rate.add(rate.get(order[x]));
@@ -143,11 +143,13 @@ public class main {
       			ps2.append(x+". "+'\t'+allAnswers[order[x]]+"\n");
       		}
       		/***************evaluation*******************/
-          	double score = eval.a_ndcg(random_rate, random_negguts, rate.size()-1);//alpha-ndcg
-      		//double score = eval.err_ia(random_rate, random_negguts, maxProp);//err-ia
+          	//double score = eval.a_ndcg(random_rate, random_negguts, rate.size()-1);//alpha-ndcg
+      		//double score = eval.nerr_ia(random_rate, random_negguts, maxProp);//err-ia-normalized
+          	//double score = eval.err_ia(random_rate, random_negguts, maxProp);
       		//double score = eval.novelty_focused(random_rate, random_negguts);//novelty-focused
       		//double score = eval.support_focused(random_rate, random_negguts);//support-focused
-      		
+      		double score = testeval.nerr(random_rate, random_negguts, maxProp);
+      		//double score = testeval.alpha_dcg(random_rate, random_negguts, rate.size()-1);
           	scores.add(score);
           	System.out.println(question_id.toString()+ score);
   			ps.append(question_id.toString()+'\t'+ score+"\n");
