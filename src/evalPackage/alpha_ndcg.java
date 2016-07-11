@@ -5,31 +5,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 public class alpha_ndcg {
-	static double alpha = 1;
+	static double alpha = 0;
 	static double maxdcg = 0;
-	/*public static void main(String[] args)//test case
-	{
-		ArrayList<Double> scores = new ArrayList<>();
-		ArrayList<int[]> nuggets = new ArrayList<>();
-		int[] t = new int[]{2,1,1,0,2,1,1,1,0,0};		
-		for(int i=0; i<10;i++)
-		{
-			scores.add((double)t[i]);
-		}
-		nuggets.add(new int[]{0,1,0,1,0,0});//a
-		nuggets.add(new int[]{0,1,0,0,0,0});//b
-		nuggets.add(new int[]{0,1,0,0,0,0});//c
-		nuggets.add(new int[]{0,0,0,0,0,0});//d
-		nuggets.add(new int[]{1,0,0,0,0,1});//e
-		nuggets.add(new int[]{1,0,0,0,0,0});//f
-		nuggets.add(new int[]{0,0,1,0,0,0});//g
-		nuggets.add(new int[]{1,0,0,0,0,0});//h
-		nuggets.add(new int[]{0,0,0,0,0,0});//i
-		nuggets.add(new int[]{0,0,0,0,0,0});//j
-		double dcg = alphandcg(scores, nuggets, 9);
-		System.out.println(dcg);
-	}
-	*/
 	
 	public static double alphandcg(ArrayList<Double> scores, ArrayList<int[]> nuggets, int m)
 	{
@@ -43,9 +20,10 @@ public class alpha_ndcg {
 	{
 		int len = scores.size();//#answers
 		int num = nuggets.get(0).length;//#aspects for each answer
-		//alpha gain vector gain[]
+
 		double[] gain = new double[len];
 		int[] appear = new int[num];//r,s[i-1]
+		Arrays.fill(appear, 0);
 		for(int i=0; i<len; i++)//a file
 		{
 			int[] judge = nuggets.get(i);
@@ -58,41 +36,14 @@ public class alpha_ndcg {
 		}
 		for(int i=0; i<len; i++)
 		{
-			gain[i] = gain[i]/(Math.log(i+2)/Math.log(2));
+			if(i==0)
+				gain[i] = gain[i]/(Math.log(i+2)/Math.log(2));
+			else
+				gain[i] = gain[i-1] + gain[i]/(Math.log(i+2)/Math.log(2));
 		}
-		for(int i=1; i<len; i++)
-		{
-			gain[i] += gain[i-1];
-		}
-/*		//cumulative gain vector
-		double[] cgain = new double[len];
-		for(int i=0; i<len; i++)
-			if(i==0) cgain[i] = gain[i];
-			else cgain[i] = gain[i] + cgain[i-1];
-		//discounted cumulative gain vector
-		double[] dcgain = new double[len];
-		for(int i=0; i<len; i++)
-			if(i==0) dcgain[i] = gain[i]/(Math.log(i+2)/Math.log(2));
-			else dcgain[i] = dcgain[i-1]+ gain[i]/(Math.log(i+2)/Math.log(2));*/
-		//return dcgain[m];
 		return gain[m];
 	}
-
-/*	public static double alpha_idcg_permute(ArrayList<Double> scores, ArrayList<int[]> nuggets, int m)
-	{
-		maxdcg = 0;
-		int len = scores.size();
-		int[] nums = new int[len];
-		int x=0, y=len-1;
-		for(int i=0; i<len; i++) 
-		{
-			if(scores.get(i)!=0) nums[x++] = i;
-			else nums[y--]=i;
-		}
-		//System.out.println(x);
-		permute(nums, scores, nuggets, m, x);
-		return maxdcg;
-	}*/
+	
 	public static double alpha_idcg_greedy(ArrayList<Double> scores, ArrayList<int[]> nuggets, int m)
 	{
 		//greedy
@@ -101,6 +52,7 @@ public class alpha_ndcg {
 		int[] order = new int[len];
 		double[] igain = new double[len];
 		int[] appear = new int[num];
+		Arrays.fill(appear, 0);
 		LinkedList<Integer> remain = new LinkedList<>();
 		for(int i=0; i<len; i++)
 			remain.add(i);
@@ -113,13 +65,7 @@ public class alpha_ndcg {
 				double cur = 0;
 				int[] mx = nuggets.get(remain.get(k));
 				for(int j=0; j<num; j++)
-					for(int x=0; x<mx[j]; x++)
-						if(mx[j]!=0) 
-							cur += (double)Math.pow((1-alpha), appear[j]);
-/*				{
-					//cur += (double)mx[j]*Math.pow((1-alpha), appear[j]);
 					if(mx[j]!=0) cur += (double)Math.pow((1-alpha), appear[j]);
-				}*/
 				if(cur>=max) 
 				{
 					rec = remain.get(k);
@@ -133,16 +79,12 @@ public class alpha_ndcg {
 			{
 				if(mx[j]!=0) appear[j]++;
 			}
-			boolean  xx = remain.remove((Integer)rec);
-			//System.out.println(rec);
+			remain.remove((Integer)rec);
 		}
 		for(int i=0; i<len; i++)
 		{
-			igain[i] = igain[i]/(Math.log(i+2)/Math.log(2));
-		}
-		for(int i=1; i<len; i++)
-		{
-			igain[i] += igain[i-1];
+			if(i==0) igain[i] = igain[i]/(Math.log(i+2)/Math.log(2));
+			else igain[i] = igain[i-1]+igain[i]/(Math.log(i+2)/Math.log(2));
 		}
 /*		//icgain
 		double[] icgain = new double[len];
@@ -163,12 +105,25 @@ public class alpha_ndcg {
 		return igain[m];
 	}
 	/***************permutation******************/
-/*	public static void permute(int[] nums, ArrayList<Double> scores, ArrayList<int[]> nuggets, int m, int x) {
-	    if(nums == null || nums.length == 0) 
-	    	{
-	    	//System.out.println(nums.length);
-	    	return;
-	    	}
+	public static double alpha_idcg_permute(ArrayList<Double> scores, ArrayList<int[]> nuggets, int m)
+	{
+		maxdcg = 0;
+		int len = scores.size();
+		int[] nums = new int[len];
+		int x=0, y=len-1;
+		for(int i=0; i<len; i++) 
+		{
+			if(scores.get(i)!=0) nums[x++] = i;
+			else nums[y--]=i;
+		}
+		//System.out.println(x);
+		permute(nums, scores, nuggets, m, x);
+		return maxdcg;
+	}
+	
+	
+	public static void permute(int[] nums, ArrayList<Double> scores, ArrayList<int[]> nuggets, int m, int x) {
+	    if(nums == null || nums.length == 0) return;
 	    ArrayList<Integer> result = new ArrayList<>();
 	    dfs(nums, result, scores, nuggets, m, x);
 	}
@@ -176,10 +131,11 @@ public class alpha_ndcg {
 	public static void dfs(int[] nums, ArrayList<Integer> result, ArrayList<Double> scores, ArrayList<int[]> nuggets, int m, int x){
 	   // if(nums.length == result.size()){
 		if(x == result.size()){
-	    	ArrayList<Integer> temp = new ArrayList<>(result);
+	    	ArrayList<Integer> temp = new ArrayList<>();
+	    	temp.addAll(result);
 	    	//process the result--temp
-	    	for(int i=0;i<nums.length; i++)
-	    		System.out.println(temp.get(i));
+
+	    	
 	    	ArrayList<Double> scores_t = new ArrayList<>();
 			ArrayList<int[]> nuggets_t = new ArrayList<>();
 	    	for(int i=0;i<x; i++)
@@ -200,5 +156,5 @@ public class alpha_ndcg {
 	        dfs(nums, result, scores, nuggets, m, x);
 	        result.remove(result.size()-1);
 	    }
-	}*/
+	}
 }
