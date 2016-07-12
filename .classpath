@@ -26,5 +26,9 @@
 	<classpathentry kind="lib" path="E:/CScourse/summer_project/code/lucene-6.0.1/core/lucene-core-6.0.1.jar"/>
 	<classpathentry kind="lib" path="E:/CScourse/summer_project/code/lucene-6.0.1/demo/lucene-demo-6.0.1.jar"/>
 	<classpathentry kind="lib" path="E:/CScourse/summer_project/code/lucene-6.0.1/queryparser/lucene-queryparser-6.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Weka-3-8/remoteExperimentServer.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Weka-3-8/weka.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Weka-3-8/wekaexamples.zip"/>
+	<classpathentry kind="lib" path="C:/Program Files/Weka-3-8/weka-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

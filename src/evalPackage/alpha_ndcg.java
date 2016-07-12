@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 public class alpha_ndcg {
-	static double alpha = 0;
+	static double alpha = 0.5;
 	static double maxdcg = 0;
 	
 	public static double alphandcg(ArrayList<Double> scores, ArrayList<int[]> nuggets, int m)
@@ -13,7 +13,7 @@ public class alpha_ndcg {
 		double dcg = alpha_dcg(scores, nuggets, m);
 		double idcg = alpha_idcg_greedy(scores, nuggets, m);
 		//double idcg = alpha_idcg_permute(scores, nuggets, m);
-		System.out.println("dcg = "+dcg+ "; idcg = "+idcg);
+		//System.out.println("dcg = "+dcg+ "; idcg = "+idcg);
 		return dcg/idcg;
 	}
 	public static double alpha_dcg(ArrayList<Double> scores, ArrayList<int[]> nuggets, int m)

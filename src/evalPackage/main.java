@@ -27,7 +27,12 @@ public class main {
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
 	    FileWriter ps = write_out(outFile);	
-		FileWriter ps2 = write_out(qAnsFile);	
+		FileWriter ps2 = write_out(qAnsFile);		
+		//**************************used to store all q and a***************************************//
+		ArrayList<String> questionCollection = new ArrayList<>();
+		ArrayList<String[]> answersCollection = new ArrayList<>();
+		ArrayList<ArrayList<Double>> rateCollection = new ArrayList<>();
+		ArrayList<ArrayList<int[]>> neggetsCollection = new ArrayList<>();
 		/***********************read file**********************************/	
 		String rw = readJasonFile.readFile(rawDataSet);
 		String prop = readJasonFile.readFile(clustersProp);		
@@ -120,29 +125,26 @@ public class main {
       			}
       			rate.add((double)count);
       			nuggets.add(nvlty);
-      			
-      			/*ps.append(question_id.toString()+'\t'+ count+": ");
-      			for(int x: nvlty) ps.append(x+", ");
-      			ps.append("\n");*/ 
           	}
-          	/*ps.append("Summery: ");
-  			for(int x: maxProp) ps.append(x+", ");
-  			ps.append("\n");
-  			*/
           	
           	ArrayList<Double> random_rate = new ArrayList<>();
           	ArrayList<int[]> random_negguts = new ArrayList<>();
-          	/***************ranking*******************/
-          	int[] order = ranking.random(questionString, allAnswers, 1);//random
+          	//********************collect all q and ans first**********************************//
+          	questionCollection.add(questionString);
+          	answersCollection.add(allAnswers);
+      		rateCollection.add(rate);
+      		neggetsCollection.add(nuggets);
+/*          	*//***************ranking*******************//*
+          	//int[] order = ranking.random(questionString, allAnswers, 1);//random
           	//int[] order = ranking.bm25(questionString, allAnswers);//bm25
-            //int[] order = ranking.mmr(questionString, allAnswers, 0.2);//bm25
-      		for(int x=0; x<rate.size();x++)
-      		{
+            //int[] order = ranking.mmr(questionString, allAnswers, 0.9);//bm25
+      		for(int x=0; x<rate.size();x++){
       			random_rate.add(rate.get(order[x]));
       			random_negguts.add(nuggets.get(order[x]));
       			ps2.append(x+". "+'\t'+allAnswers[order[x]]+"\n");
       		}
-      		/***************evaluation*******************/
+
+      		*//***************evaluation*******************//*
           	double score = eval.a_ndcg(random_rate, random_negguts, rate.size()-1);//alpha-ndcg
       		//double score = eval.nerr_ia(random_rate, random_negguts, maxProp);//err-ia-normalized
           	//double score = eval.err_ia(random_rate, random_negguts, maxProp);
@@ -152,11 +154,11 @@ public class main {
       		//double score = testeval.alpha_dcg(random_rate, random_negguts, rate.size()-1);
           	scores.add(score);
           	System.out.println(question_id.toString()+ score);
-  			ps.append(question_id.toString()+'\t'+ score+"\n");
+  			ps.append(question_id.toString()+'\t'+ score+"\n");*/
           }
-          double aveg = average_eval(scores);
+/*          double aveg = average_eval(scores);
           ps.append("Average: "+'\t'+ aveg+"\n");
-          System.out.println("average: "+ aveg);
+          System.out.println("average: "+ aveg);*/
 
       } catch (ParseException e) {
           // TODO Auto-generated catch block
@@ -164,6 +166,13 @@ public class main {
       }
       ps.close();
       ps2.close();
+      //add
+      testCV cv = new testCV(questionCollection, answersCollection, rateCollection, neggetsCollection, 5, 0, 1, 0.1);
+      double[] rrrr = cv.work();
+      double sum=0;
+      for(int i=0; i<rrrr.length; i++)  sum += rrrr[i]; 
+      System.out.println("average£º" + sum/rrrr.length);
+      //end
       System.out.println("finishied!");
 	}
 
