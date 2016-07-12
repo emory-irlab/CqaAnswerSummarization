@@ -167,7 +167,7 @@ public class main {
       ps.close();
       ps2.close();
       //add
-      testCV cv = new testCV(questionCollection, answersCollection, rateCollection, neggetsCollection, 5, 0, 1, 0.1);
+      testCV cv = new testCV(questionCollection, answersCollection, rateCollection, neggetsCollection, 5, 0.6, 1, 0.05);
       double[] rrrr = cv.work();
       double sum=0;
       for(int i=0; i<rrrr.length; i++)  sum += rrrr[i]; 

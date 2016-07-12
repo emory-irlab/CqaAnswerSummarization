@@ -75,7 +75,7 @@ public class testCV {
 			average = average/(double)scores.size();
 			
 			para.add(lamda);
-			System.out.println(lamda);
+			//System.out.println(lamda);
 			avgScore.add(average);
 			lamda += lamda_step;
 		}
