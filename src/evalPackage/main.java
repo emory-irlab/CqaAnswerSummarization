@@ -130,13 +130,13 @@ public class main {
           	ArrayList<Double> random_rate = new ArrayList<>();
           	ArrayList<int[]> random_negguts = new ArrayList<>();
           	//********************collect all q and ans first**********************************//
-/*          	questionCollection.add(questionString);
+          	questionCollection.add(questionString);
           	answersCollection.add(allAnswers);
       		rateCollection.add(rate);
-      		neggetsCollection.add(nuggets);*/
+      		neggetsCollection.add(nuggets);
           	//***************ranking*******************//*
-          	//int[] order = ranking.random(questionString, allAnswers, 1);//random
-          	int[] order = ranking.bm25(questionString, allAnswers);//bm25
+/*          	//int[] order = ranking.random(questionString, allAnswers, 1);//random
+          	//int[] order = ranking.bm25(questionString, allAnswers);//bm25
             //int[] order = ranking.mmr(questionString, allAnswers, 0.9);//bm25
       		for(int x=0; x<rate.size();x++){
       			random_rate.add(rate.get(order[x]));
@@ -154,11 +154,11 @@ public class main {
       		//double score = testeval.alpha_dcg(random_rate, random_negguts, rate.size()-1);
           	scores.add(score);
           	System.out.println(question_id.toString()+ score);
-  			ps.append(question_id.toString()+'\t'+ score+"\n");
+  			ps.append(question_id.toString()+'\t'+ score+"\n");*/
           }
-          double aveg = average_eval(scores);
+/*          double aveg = average_eval(scores);
           ps.append("Average: "+'\t'+ aveg+"\n");
-          System.out.println("average: "+ aveg);
+          System.out.println("average: "+ aveg);*/
 
       } catch (ParseException e) {
           // TODO Auto-generated catch block
@@ -167,11 +167,11 @@ public class main {
       ps.close();
       ps2.close();
       //add
-  /*    testCV cv = new testCV(questionCollection, answersCollection, rateCollection, neggetsCollection, 5, 0, 1, 0.1);
+      testCV cv = new testCV(questionCollection, answersCollection, rateCollection, neggetsCollection, 5, 0, 1.0, 0.1);
       double[] rrrr = cv.work();
       double sum=0;
       for(int i=0; i<rrrr.length; i++)  sum += rrrr[i]; 
-      System.out.println("average£º" + sum/rrrr.length);*/
+      System.out.println("average£º" + sum/rrrr.length);
       //end
       System.out.println("finishied!");
 	}

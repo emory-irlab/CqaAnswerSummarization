@@ -52,12 +52,12 @@ public class myBM25 {
 		parseAll();
 		LinkedList<Integer> selected = new LinkedList<>();
 		LinkedList<Integer> unselect = new LinkedList<>();
-		for(int i=0; i<len;i++) unselect.add(i);
+		for(int i=0; i<len;i++) unselect.add(i);//add index to this list
 		double avgdl = avgdl();
 		
 		while(!unselect.isEmpty())
 		{
-			double maxDiScore = 0;
+			double maxDiScore = Double.NEGATIVE_INFINITY;
 			int maxDi = 0;
 			for(int i=0; i<unselect.size();i++)//choose one from the unselected list
 			{
@@ -68,10 +68,11 @@ public class myBM25 {
 				for(int j=0; j<selected.size();j++)
 				{
 					int tmpInd = selected.get(j);
-					//max = Math.max(max, bm25Similarity(answerList.get(tmpInd),answerList.get(curInd), alength[tmpInd], avgdl));
+					//max = Math.max(max, bm25Similarity(answerList.get(tmpInd),answerList.get(curInd), alength[curInd], avgdl));
 					max = Math.max(max, bm25Similarity(answerList.get(curInd),answerList.get(tmpInd), alength[tmpInd], avgdl));
 				}
-				double mSim = lamda*(qaSim-(1-lamda)*max);
+//				double mSim = lamda*(qaSim-(1-lamda)*max);
+				double mSim = lamda*qaSim-(1-lamda)*max;
 				if(mSim >= maxDiScore)
 				{
 					maxDiScore = mSim;
