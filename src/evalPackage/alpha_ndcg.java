@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 public class alpha_ndcg {
-	static double alpha = 0.5;
+	static double alpha = 0.1;
 	static double maxdcg = 0;
 	
 	public static double alphandcg(ArrayList<Double> scores, ArrayList<int[]> nuggets, int m)

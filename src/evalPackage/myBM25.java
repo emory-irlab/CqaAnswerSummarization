@@ -88,7 +88,49 @@ public class myBM25 {
 		return order;
 		
 	}
-	
+	public static int[] mmr_mixsim(double lamda) throws IOException
+	{
+		int len = answers.length;
+		parseAll();
+		LinkedList<Integer> selected = new LinkedList<>();
+		LinkedList<Integer> unselect = new LinkedList<>();
+		for(int i=0; i<len;i++) unselect.add(i);//add index to this list
+		double avgdl = avgdl();
+		
+		while(!unselect.isEmpty())
+		{
+			double maxDiScore = Double.NEGATIVE_INFINITY;
+			int maxDi = 0;
+			for(int i=0; i<unselect.size();i++)//choose one from the unselected list
+			{
+				int curInd = unselect.get(i);
+				double qaSim = bm25Similarity(qMap, answerList.get(curInd), qlength , alength[curInd]);
+				
+				double max = -1;//shouldn't be a problem
+				for(int j=0; j<selected.size();j++)
+				{
+					int tmpInd = selected.get(j);
+					//max = Math.max(max, bm25Similarity(answerList.get(tmpInd),answerList.get(curInd), alength[curInd], avgdl));
+					max = Math.max(max, similarity(answerList.get(curInd),answerList.get(tmpInd), alength[curInd], alength[tmpInd]));
+				}
+				double mSim = lamda*(qaSim-(1-lamda)*max);
+				//double mSim = lamda*qaSim-(1-lamda)*max;
+				if(mSim >= maxDiScore)
+				{
+					maxDiScore = mSim;
+					maxDi = i;//index
+				}			
+			}
+			int tmp = unselect.remove(maxDi);
+			selected.add(tmp);		
+		}
+		int[] order = new int[len];
+		for(int i=0; i<len; i++)
+			order[i] = selected.get(i);
+		
+		return order;
+		
+	}
 	public static double similarity(HashMap<String, Integer> a1Map, HashMap<String, Integer> a2Map, int a1len, int a2len)
 	{
 		int cover = 0;
