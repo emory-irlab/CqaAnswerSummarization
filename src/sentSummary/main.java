@@ -1,4 +1,4 @@
-package evalPackage;
+package sentSummary;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -13,8 +13,9 @@ import org.json.simple.parser.ParseException;
 
 import edu.stanford.nlp.simple.*;
 
-public class summary {
-	
+import evalPackage.readJasonFile;
+
+public class main {	
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
@@ -52,8 +53,14 @@ public class summary {
 		{
 			String curQuesiton = questionCollection.get(i);
 			String[] curAnswers = answersCollection.get(i);
+			
+			ArrayList<String> ansSent = new ArrayList<>();
+			
+			
 			double[] rate = rateCollection.get(i);
 			ArrayList<int[]> neggets = neggetsCollection.get(i);
+			
+			answersSplite(curAnswers, ansSent, 5);
 			//***************ranking*******************//
 			int[] order = ranking.random(curQuesiton, curAnswers, 1);//random--seed
           	//int[] order = ranking.bm25(curQuesiton, curAnswers);//bm25
@@ -165,6 +172,7 @@ public class summary {
       } catch (ParseException e) {e.printStackTrace();}
       return collectionSize;
 	}
+	
 	public static void getAspects(ArrayList<String> questionCollection , ArrayList<String[]> answersCollection,	ArrayList<ArrayList<ArrayList<String>>> clusterCollection, 
 			ArrayList<double[]> rateCollection, ArrayList<ArrayList<int[]>> neggetsCollection)
 	{
@@ -201,6 +209,7 @@ public class summary {
 			neggetsCollection.add(neggets);
 		}
 	}
+	
 	public static String stringProcess(String s)
 	{
 		StringBuilder sb = new StringBuilder();		
@@ -217,6 +226,7 @@ public class summary {
 		}
 		return sb.toString();
 	}
+	
 	public static void answersSplite(String[] answers, ArrayList<String> ansSent, int minLength)
 	{
 		for(int i=0; i<answers.length; i++)
