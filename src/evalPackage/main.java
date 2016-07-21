@@ -31,11 +31,17 @@ public class main {
 		//**************************used to store all q and a***************************************//
 		ArrayList<String> questionCollection = new ArrayList<>();
 		ArrayList<String[]> answersCollection = new ArrayList<>();
+		ArrayList<ArrayList<ArrayList<String>>> clusterCollection = new ArrayList<>();
+		
 		ArrayList<ArrayList<Double>> rateCollection = new ArrayList<>();
 		ArrayList<ArrayList<int[]>> neggetsCollection = new ArrayList<>();
 		/***********************read file**********************************/	
 		String rw = readJasonFile.readFile(rawDataSet);
-		String prop = readJasonFile.readFile(clustersProp);		
+		String prop = readJasonFile.readFile(clustersProp);	
+		
+		//************call a function to read necessary info from jasion file*********************//
+		getQueAnsClu(rw, prop, questionCollection, answersCollection, clusterCollection);
+		
 		/**********************process************************************/	
 		JSONParser parser = new JSONParser();
         try {
@@ -197,6 +203,67 @@ public class main {
 		double sum = 0;
 		for(double score: scores)	sum += score;
 		return sum/(double)scores.size();
+	}
+	public static void getQueAnsClu(String rw, String prop, ArrayList<String> questionCollection ,	
+			ArrayList<String[]> answersCollection,	ArrayList<ArrayList<ArrayList<String>>> clusterCollection )
+	{
+		JSONParser parser = new JSONParser();
+        try {
+	      	JSONObject jsonRawdata = (JSONObject) parser.parse(rw);
+	      	JSONObject jsonPropos = (JSONObject) parser.parse(prop);          
+          
+            JSONArray qArray = (JSONArray)jsonRawdata.get("questions");
+            JSONArray cArray = (JSONArray)jsonPropos.get("questions"); 
+          
+            ArrayList<Double> scores = new ArrayList<>();          
+            //for each question -- identified by question id
+            for(int i=0; i<qArray.size(); i++)
+            {
+            	JSONObject question = (JSONObject)qArray.get(i); 
+	          	/* question:
+	          	 * 0. answers	 * 1. question_timestamp   	 * 2. title	 * 3. body    	 * 4. question_id 
+	          	 * */ 
+	            JSONArray answers = (JSONArray)question.get("answers");
+	          	Object question_id = question.get("question_id");
+	          	//********form & store question string
+	          	String title = question.containsKey("title")?question.get("title").toString():"";
+	          	String body = question.containsKey("body")?question.get("body").toString():"";
+	          	String questionString = title+" "+body;
+	          	
+	          	questionCollection.add(questionString);
+	          	//*********store all the answers
+	          	String[] curAnswers = new String[answers.size()];
+	          	for(int j=0; j<answers.size(); j++)
+	          		curAnswers[j] = answers.get(j).toString();
+	          	answersCollection.add(curAnswers);
+	          	
+	          	//***********find & store its cluster
+	          	int k;
+	          	for(k=0; k<cArray.size(); k++)
+	          	{
+	          		JSONObject proposition = (JSONObject)cArray.get(k); 
+	          		if(proposition.get("question_id").equals(question_id)) break;
+	          	}
+	          	JSONObject prop_group = (JSONObject)cArray.get(k);
+	          	JSONArray cluster = (JSONArray)prop_group.get("proposition_clusters");
+	            //curCluster <-- cluster
+	          	ArrayList<ArrayList<String>> curCluster = new ArrayList<>();
+	          	for(int m=0; m<cluster.size();m++)//every aspects
+	          	{
+	          		JSONArray aspect = (JSONArray)cluster.get(m);
+	          		ArrayList<String> curAspect = new ArrayList<>();
+	          		for(int n=0; n<cluster.size();n++)//every proposition
+	          		{
+	          			String s = aspect.get(n).toString();
+	          			curAspect.add(s);
+	          		}
+	          		curCluster.add(curAspect);
+	          	}
+	          	clusterCollection.add(curCluster);
+          }
+      } catch (ParseException e) {
+          e.printStackTrace();
+      }
 	}
 }
 
