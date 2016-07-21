@@ -11,9 +11,9 @@ public class testCV {
 	private double lamda_step, lamda_low, lamda_high;
 	private ArrayList<String> allQuestions;
 	private ArrayList<String[]> allAnswers;
-	private ArrayList<ArrayList<Double>> allRate;
+	private ArrayList<double[]> allRate;
 	private ArrayList<ArrayList<int[]>> allNuggets;
-	public testCV(ArrayList<String> q, ArrayList<String[]> a, ArrayList<ArrayList<Double>> r, 
+	public testCV(ArrayList<String> q, ArrayList<String[]> a, ArrayList<double[]> r, 
 			ArrayList<ArrayList<int[]>> n, int k, double low, double high, double step)
 	{
 		this.kfd = k;
@@ -53,19 +53,19 @@ public class testCV {
 				for(int j=0; j<allData[0].length; j++){
 					String question = allQuestions.get(allData[i][j]);
 					String[] answers = allAnswers.get(allData[i][j]);					
-					ArrayList<Double> rate = allRate.get(allData[i][j]);
+					double[] rate = allRate.get(allData[i][j]);
 					ArrayList<int[]> nuggets = allNuggets.get(allData[i][j]);
 					//System.out.println(allRate.get);
 					int[] order = ranking.mmr(question, answers, lamda);
 					
 					ArrayList<Double> tmp_rate = new ArrayList<>();
 					ArrayList<int[]> tmp_negguts = new ArrayList<>();
-					for(int x=0; x<rate.size();x++){
-		      			tmp_rate.add(rate.get(order[x]));
+					for(int x=0; x<rate.length;x++){
+		      			tmp_rate.add(rate[order[x]]);
 		      			tmp_negguts.add(nuggets.get(order[x]));
 		      		}
 					
-					double score = eval.a_ndcg(tmp_rate, tmp_negguts, rate.size()-1);
+					double score = eval.a_ndcg(tmp_rate, tmp_negguts, rate.length-1);
 					scores.add(score);
 				}
 			}
@@ -92,18 +92,18 @@ public class testCV {
 		for(int i=0; i<allData[0].length; i++){
 			String question = allQuestions.get(allData[test][i]);
 			String[] answers = allAnswers.get(allData[test][i]);					
-			ArrayList<Double> rate = allRate.get(allData[test][i]);
+			double[] rate = allRate.get(allData[test][i]);
 			ArrayList<int[]> nuggets = allNuggets.get(allData[test][i]);
 			
 			int[] order = ranking.mmr(question, answers, lamda);
 			
 			ArrayList<Double> tmp_rate = new ArrayList<>();
 			ArrayList<int[]> tmp_negguts = new ArrayList<>();
-			for(int x=0; x<rate.size();x++){
-      			tmp_rate.add(rate.get(order[x]));
+			for(int x=0; x<rate.length;x++){
+      			tmp_rate.add(rate[order[x]]);
       			tmp_negguts.add(nuggets.get(order[x]));
       		}			
-			double score = eval.a_ndcg(tmp_rate, tmp_negguts, rate.size()-1);
+			double score = eval.a_ndcg(tmp_rate, tmp_negguts, rate.length-1);
 			scores.add(score);
 		}
 		double sum = 0;

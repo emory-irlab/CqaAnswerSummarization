@@ -27,8 +27,8 @@ public class main {
 	static String qAnsFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\qAnsFile.txt";
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
-	    FileWriter ps = write_out(outFile);	
-		FileWriter ps2 = write_out(qAnsFile);		
+	    FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
+		FileWriter ps2 = write_out(qAnsFile);	//rated question and answers (re-order)
 		//**************************used to store all q and a***************************************//
 		ArrayList<String> questionCollection = new ArrayList<>();
 		ArrayList<String[]> answersCollection = new ArrayList<>();
@@ -55,6 +55,7 @@ public class main {
 		 *          ----answer2----rate----[n1, n2, ...]
 		 ***********************************************/
 		//*******work
+		ArrayList<Double> result = new ArrayList<>();
 		for(int i=0; i<questionCollection.size();i++)
 		{
 			String curQuesiton = questionCollection.get(i);
@@ -81,10 +82,10 @@ public class main {
       		//double score = eval.support_focused(newRate, newNeggets);//support-focused
       		//double score = testeval.nerr(newRate, newNeggets, maxProp);
       		//double score = testeval.alpha_dcg(newRate, newNeggets, rate.length-1);
-			
+          	result.add(score);
 		}
-
-      ps.close();
+		System.out.println("average£º" + average_eval(result));
+      ps1.close();
       ps2.close();
       /*add
       testCV cv = new testCV(questionCollection, answersCollection, rateCollection, neggetsCollection, 5, 0.3, 0.7, 0.1);
