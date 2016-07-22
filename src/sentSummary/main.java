@@ -19,7 +19,7 @@ public class main {
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
-	static int answerLength=50;
+	static int answerLength=200;
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
 	    FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
@@ -65,7 +65,8 @@ public class main {
 			//***************ranking*******************//
 			ranking rk = new ranking();
 			String formedAnswer = rk.bm25(curQuesiton, ansSent, answerLength);
-			System.out.println(formedAnswer);
+			//System.out.println("question "+i+". "+formedAnswer);
+			ps1.append("question "+(i+1)+".\t"+stringProcess(formedAnswer)+"\n");
 		}
 		//System.out.println("average£º" + average_eval(result));
       ps1.close();
@@ -126,7 +127,11 @@ public class main {
 	          	//*********store all the answers
 	          	String[] curAnswers = new String[answers.size()];
 	          	for(int j=0; j<answers.size(); j++)
-	          		curAnswers[j] = answers.get(j).toString();
+	          	{
+	          		JSONObject a = (JSONObject)answers.get(j);
+	          		curAnswers[j] = a.get("answer_text").toString();
+	          	}	          		
+	          	
 	          	answersCollection.add(curAnswers);
 	          	
 	          	//***********find & store its cluster

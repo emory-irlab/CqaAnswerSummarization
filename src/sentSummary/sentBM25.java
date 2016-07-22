@@ -150,7 +150,23 @@ public class sentBM25 {
 			if(a2Map.containsKey(word)) cover += Math.min(a1Map.get(word), a2Map.get(word));
 		return (double)cover/(a1len+a2len);
 	}
-	
+	public static double cosineSim(HashMap<String, Integer> a1Map, HashMap<String, Integer> a2Map)
+	{
+		double a1Length=0, a2Length=0;
+		double dotProduct = 0;
+		for(String word: a1Map.keySet())
+			a1Length += Math.pow(a1Map.get(word), 2);
+		a1Length = Math.sqrt(a1Length);
+		for(String word: a2Map.keySet())
+			a2Length += Math.pow(a2Map.get(word), 2);
+		a2Length = Math.sqrt(a2Length);
+		
+		for(String word: a1Map.keySet())
+			if(a2Map.containsKey(word)) 
+				dotProduct += (double)a1Map.get(word)* a2Map.get(word);
+		
+		return dotProduct/(a1Length*a2Length);
+	}
 	public static int[] mmr_bm25based(double lamda) throws IOException
 	{
 		int len = answers.size();
