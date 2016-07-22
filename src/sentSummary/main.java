@@ -12,13 +12,14 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import edu.stanford.nlp.simple.*;
-
+//import evalPackage.ranking;
 import evalPackage.readJasonFile;
 
 public class main {	
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
+	static int answerLength=50;
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
 	    FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
@@ -48,7 +49,7 @@ public class main {
 		 *          ----answer2----rate----[n1, n2, ...]
 		 ***********************************************/
 		//*******work
-		ArrayList<Double> result = new ArrayList<>();
+		//ArrayList<Double> result = new ArrayList<>();
 		for(int i=0; i<questionCollection.size();i++)
 		{
 			String curQuesiton = questionCollection.get(i);
@@ -62,28 +63,11 @@ public class main {
 			
 			answersSplite(curAnswers, ansSent, 5);
 			//***************ranking*******************//
-			int[] order = ranking.random(curQuesiton, curAnswers, 1);//random--seed
-          	//int[] order = ranking.bm25(curQuesiton, curAnswers);//bm25
-            //int[] order = ranking.mmr(curQuesiton, curAnswers, 0.9);//mmr lamda	
-			
-			ArrayList<Double> newRate = new ArrayList<>();
-			ArrayList<int[]> newNeggets = new ArrayList<>();			
-			for(int x=0; x<rate.length;x++)
-			{
-				newRate.add(rate[order[x]]);
-				newNeggets.add(neggets.get(order[x]));
-      		}
-			//***************evaluation*******************//
-          	double score = eval.a_ndcg(newRate, newNeggets, rate.length-1);//alpha-ndcg
-      		//double score = eval.nerr_ia(newRate, newNeggets, maxProp);//err-ia-normalized
-          	//double score = eval.err_ia(newRate, newNeggets, maxProp);
-      		//double score = eval.novelty_focused(newRate, newNeggets);//novelty-focused
-      		//double score = eval.support_focused(newRate, newNeggets);//support-focused
-      		//double score = testeval.nerr(newRate, newNeggets, maxProp);
-      		//double score = testeval.alpha_dcg(newRate, newNeggets, rate.length-1);
-          	result.add(score);
+			ranking rk = new ranking();
+			String formedAnswer = rk.bm25(curQuesiton, ansSent, answerLength);
+			System.out.println(formedAnswer);
 		}
-		System.out.println("average£º" + average_eval(result));
+		//System.out.println("average£º" + average_eval(result));
       ps1.close();
       System.out.println("finishied!");
 	}

@@ -62,7 +62,7 @@ public class main {
 			String[] curAnswers = answersCollection.get(i);
 			double[] rate = rateCollection.get(i);
 			ArrayList<int[]> neggets = neggetsCollection.get(i);
-			//***************rating*******************//
+			//***************ranking*******************//
 			int[] order = ranking.random(curQuesiton, curAnswers, 1);//random--seed
           	//int[] order = ranking.bm25(curQuesiton, curAnswers);//bm25
             //int[] order = ranking.mmr(curQuesiton, curAnswers, 0.9);//mmr lamda	
@@ -74,7 +74,7 @@ public class main {
 				newRate.add(rate[order[x]]);
 				newNeggets.add(neggets.get(order[x]));
       		}
-			//***************evaluation*******************//*
+			//***************evaluation*******************//
           	double score = eval.a_ndcg(newRate, newNeggets, rate.length-1);//alpha-ndcg
       		//double score = eval.nerr_ia(newRate, newNeggets, maxProp);//err-ia-normalized
           	//double score = eval.err_ia(newRate, newNeggets, maxProp);
