@@ -19,13 +19,15 @@ public class main {
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
-	static int answerLength=200;
+	static int answerLength=1000;
+	static int sentLength = 5;
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
 	    FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
 		//**************************used to store all q and a***************************************//
 		ArrayList<String> questionCollection = new ArrayList<>();
 		ArrayList<String[]> answersCollection = new ArrayList<>();
+		ArrayList<ArrayList<String>> ansSentCollection = new ArrayList<>();
 		ArrayList<ArrayList<ArrayList<String>>> clusterCollection = new ArrayList<>();		
 
 		/***********************read file**********************************/	
@@ -33,42 +35,52 @@ public class main {
 		String prop = readJasonFile.readFile(clustersProp);	
 		
 		//************read necessary info from JSON file*********************//
-		int collectionSize = getQueAnsClu(rw, prop, questionCollection, answersCollection, clusterCollection);
+		int collectionSize = getQueAnsClu(rw, prop, questionCollection, answersCollection, ansSentCollection, clusterCollection);
 		
 		
 		/**************cal every answers' aspects**************/
 		ArrayList<double[]> rateCollection = new ArrayList<>();
 		ArrayList<ArrayList<int[]>> neggetsCollection = new ArrayList<>();
-		
-		getAspects(questionCollection, answersCollection, clusterCollection, rateCollection, neggetsCollection);
+
+		getAspects(questionCollection, ansSentCollection, clusterCollection, rateCollection, neggetsCollection);
 		/***********************************************
-		 * qCollect     ansC       rateC   neggetsC
-		 * question1----answer1----rate----[n1, n2, ...]
-		 *          ----answer2----rate----[n1, n2, ...]
-		 * question2----answer1----rate----[n1, n2, ...]
-		 *          ----answer2----rate----[n1, n2, ...]
+		 * qCollect     sentC       rateC   neggetsC
+		 * question1----sentence1----rate----[n1, n2, ...]
+		 *          ----sentence2----rate----[n1, n2, ...]
+		 * question2----sentence1----rate----[n1, n2, ...]
+		 *          ----sentence2----rate----[n1, n2, ...]
 		 ***********************************************/
 		//*******work
-		//ArrayList<Double> result = new ArrayList<>();
+		ArrayList<Double> result = new ArrayList<>();
 		for(int i=0; i<questionCollection.size();i++)
 		{
-			String curQuesiton = questionCollection.get(i);
-			String[] curAnswers = answersCollection.get(i);
-			
+			String curQuesiton = questionCollection.get(i);			
 			ArrayList<String> ansSent = new ArrayList<>();
-			
+			ansSent.addAll(ansSentCollection.get(i));
 			
 			double[] rate = rateCollection.get(i);
 			ArrayList<int[]> neggets = neggetsCollection.get(i);
 			
-			answersSplite(curAnswers, ansSent, 5);
 			//***************ranking*******************//
 			ranking rk = new ranking();
-			String formedAnswer = rk.bm25(curQuesiton, ansSent, answerLength);
+			//int[] sentRank = rk.bm25(curQuesiton, ansSent);
+			int[] sentRank = rk.mmr(curQuesiton, ansSent, 0.6);
 			//System.out.println("question "+i+". "+formedAnswer);
-			ps1.append("question "+(i+1)+".\t"+stringProcess(formedAnswer)+"\n");
+			StringBuilder formedAnswer = new StringBuilder();
+			int n=0;
+			while(formedAnswer.length()<answerLength)
+			{				
+				formedAnswer.append(ansSent.get(sentRank[n++]));
+				if(n>=ansSent.size()) break;
+			}			
+			String finalAnswer =  formedAnswer.toString();
+			//*******evaluation*******//
+			evaluation eval = new evaluation();
+			double score = eval.alpha_ndcg_length(sentRank, ansSent, rateCollection.get(i), neggetsCollection.get(i), answerLength);
+			result.add(score);
+			ps1.append("question "+(i+1)+".\t"+score+"\t"+stringProcess(finalAnswer)+"\n");
 		}
-		//System.out.println("average£º" + average_eval(result));
+	  System.out.println("average£º" + average_eval(result));
       ps1.close();
       System.out.println("finishied!");
 	}
@@ -96,7 +108,8 @@ public class main {
 		return sum/(double)scores.size();
 	}
 	public static int getQueAnsClu(String rw, String prop, ArrayList<String> questionCollection ,	
-			ArrayList<String[]> answersCollection,	ArrayList<ArrayList<ArrayList<String>>> clusterCollection )
+			ArrayList<String[]> answersCollection,	ArrayList<ArrayList<String>> ansSentCollection, 
+			ArrayList<ArrayList<ArrayList<String>>> clusterCollection )
 	{
 		int collectionSize = 0;
 		JSONParser parser = new JSONParser();
@@ -130,9 +143,11 @@ public class main {
 	          	{
 	          		JSONObject a = (JSONObject)answers.get(j);
 	          		curAnswers[j] = a.get("answer_text").toString();
-	          	}	          		
-	          	
+	          	} 
 	          	answersCollection.add(curAnswers);
+          		ArrayList<String> curSent = new ArrayList<>();
+          		answersSplite(curAnswers, curSent, sentLength);
+          		ansSentCollection.add(curSent);
 	          	
 	          	//***********find & store its cluster
 	          	int k;
@@ -162,22 +177,22 @@ public class main {
       return collectionSize;
 	}
 	
-	public static void getAspects(ArrayList<String> questionCollection , ArrayList<String[]> answersCollection,	ArrayList<ArrayList<ArrayList<String>>> clusterCollection, 
+	public static void getAspects(ArrayList<String> questionCollection , ArrayList<ArrayList<String>> ansSentCollection, ArrayList<ArrayList<ArrayList<String>>> clusterCollection, 
 			ArrayList<double[]> rateCollection, ArrayList<ArrayList<int[]>> neggetsCollection)
 	{
 		for(int i=0; i<questionCollection.size(); i++)
 		{
 			String curQuesiton = questionCollection.get(i);
-			String[] curAnswers = answersCollection.get(i);
+			ArrayList<String> curAnswers = ansSentCollection.get(i);
 			ArrayList<ArrayList<String>> curCluster = clusterCollection.get(i);
 			
-			double[] rate = new double[curAnswers.length];
+			double[] rate = new double[curAnswers.size()];
 			ArrayList<int[]> neggets = new ArrayList<>();
 			
 			curQuesiton = stringProcess(curQuesiton);			
-			for(int j=0; j<curAnswers.length; j++)//every answer
+			for(int j=0; j<curAnswers.size(); j++)//every answer
 			{
-				String ans = stringProcess(curAnswers[j]);
+				String ans = stringProcess(curAnswers.get(j));
 				double count = 0;
 				int[] negget = new int[curCluster.size()];
 				Arrays.fill(negget, 0);

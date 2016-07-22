@@ -16,7 +16,6 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 public class sentBM25 {
 	static String question;
 	static ArrayList<String> answers;
-	static int maxLength;
 	
 	static int qlength;
 	static int[] alength;
@@ -24,40 +23,29 @@ public class sentBM25 {
 	static HashMap<String, Integer> qMap;
 	static ArrayList<HashMap<String, Integer>> answerList;
 	
-	public sentBM25(String q, ArrayList<String> as, int l)
+	public sentBM25(String q, ArrayList<String> as)
 	{
 		this.question = q;
 		this.answers = new ArrayList<>();
 		for(int i=0;i<as.size();i++)
 			answers.add(as.get(i));
-		this.maxLength = l;
 		alength = new int[as.size()];
 		answerList = new ArrayList<>();
 		qMap = new HashMap<>();
 	}
 	
-	public static String aBM25() throws IOException
+	public int[] aBM25() throws IOException
 	{
 		int len = answers.size();
 		parseAll();
-		//int[] order = new int[len];
 		double[] scores = new double[len];
 		double avgdl = avgdl();
 		for(int i=0;i<len;i++)
 			scores[i] = bm25Similarity(qMap, answerList.get(i), alength[i], avgdl);
-		int[] sentRank = getOrder(scores);
-		//form the answer
-		StringBuilder finalAnswer = new StringBuilder();
-		int i=0;
-		while(finalAnswer.length()<maxLength)
-		{
-			finalAnswer.append(answers.get(sentRank[i++]));
-			if(i>answers.size()) break;
-		}
+		return getOrder(scores);
 		
-		return finalAnswer.toString();
 	}
-	public static int[] mmr_simbased(double lamda) throws IOException
+	public int[] mmr_simbased(double lamda) throws IOException
 	{
 		int len = answers.size();
 		parseAll();
@@ -96,11 +84,11 @@ public class sentBM25 {
 		int[] order = new int[len];
 		for(int i=0; i<len; i++)
 			order[i] = selected.get(i);
-		
+
 		return order;
 		
 	}
-	public static int[] mmr_mixsim(double lamda) throws IOException
+	public int[] mmr_mixsim(double lamda) throws IOException
 	{
 		int len = answers.size();
 		parseAll();
@@ -139,7 +127,7 @@ public class sentBM25 {
 		int[] order = new int[len];
 		for(int i=0; i<len; i++)
 			order[i] = selected.get(i);
-		
+				
 		return order;
 		
 	}
@@ -167,7 +155,7 @@ public class sentBM25 {
 		
 		return dotProduct/(a1Length*a2Length);
 	}
-	public static int[] mmr_bm25based(double lamda) throws IOException
+	public int[] mmr_bm25based(double lamda) throws IOException
 	{
 		int len = answers.size();
 		parseAll();

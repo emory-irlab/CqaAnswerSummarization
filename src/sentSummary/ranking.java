@@ -7,9 +7,9 @@ import java.util.Random;
 
 public class ranking {
 
-	public String bm25(String question, ArrayList<String> anwsers, int answerLength) throws IOException
+	public int[] bm25(String question, ArrayList<String> anwsers) throws IOException
 	{
-		sentBM25 rk = new sentBM25(question, anwsers, answerLength);
+		sentBM25 rk = new sentBM25(question, anwsers);
 		return rk.aBM25();
 	}
 
@@ -27,12 +27,12 @@ public class ranking {
 		return order;
 	}
 	
-	public int[] mmr(String question, ArrayList<String> anwsers, int answerLength, double lamda) throws IOException
+	public int[] mmr(String question, ArrayList<String> anwsers, double lamda) throws IOException
 	{
-		sentBM25 rk = new sentBM25(question, anwsers, answerLength);
-		//return rk.mmr_bm25based(lamda);
+		sentBM25 rk = new sentBM25(question, anwsers);
+		return rk.mmr_bm25based(lamda);
 		//return rk.mmr_simbased(lamda);
-		return rk.mmr_mixsim(lamda);
+		//return rk.mmr_mixsim(lamda);
 		
 	}
 }
