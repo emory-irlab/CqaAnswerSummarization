@@ -19,7 +19,7 @@ public class main {
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
-	static int answerLength=1000;
+	static int answerLength=500;
 	static int sentLength = 5;
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
@@ -64,7 +64,7 @@ public class main {
 			//***************ranking*******************//
 			ranking rk = new ranking();
 			//int[] sentRank = rk.bm25(curQuesiton, ansSent);
-			int[] sentRank = rk.mmr(curQuesiton, ansSent, 0.6);
+			int[] sentRank = rk.mmr(curQuesiton, ansSent, 0);
 			//System.out.println("question "+i+". "+formedAnswer);
 			StringBuilder formedAnswer = new StringBuilder();
 			int n=0;
