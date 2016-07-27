@@ -20,7 +20,7 @@ public class main {
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
 	static int answerLength=500;
-	static int sentLength = 5;
+	static int sentLength = 7;
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
 	    FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
@@ -64,7 +64,7 @@ public class main {
 			//***************ranking*******************//
 			ranking rk = new ranking();
 			//int[] sentRank = rk.bm25(curQuesiton, ansSent);
-			int[] sentRank = rk.mmr(curQuesiton, ansSent, 0);
+			int[] sentRank = rk.mmr(curQuesiton, ansSent, 1);
 			//System.out.println("question "+i+". "+formedAnswer);
 			StringBuilder formedAnswer = new StringBuilder();
 			int n=0;
@@ -107,6 +107,7 @@ public class main {
 		for(double score: scores)	sum += score;
 		return sum/(double)scores.size();
 	}
+	
 	public static int getQueAnsClu(String rw, String prop, ArrayList<String> questionCollection ,	
 			ArrayList<String[]> answersCollection,	ArrayList<ArrayList<String>> ansSentCollection, 
 			ArrayList<ArrayList<ArrayList<String>>> clusterCollection )

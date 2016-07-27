@@ -111,7 +111,8 @@ public class sentBM25 {
 				{
 					int tmpInd = selected.get(j);
 					//max = Math.max(max, bm25Similarity(answerList.get(tmpInd),answerList.get(curInd), alength[curInd], avgdl));
-					max = Math.max(max, similarity(answerList.get(curInd),answerList.get(tmpInd), alength[curInd], alength[tmpInd]));
+					//max = Math.max(max, similarity(answerList.get(curInd),answerList.get(tmpInd), alength[curInd], alength[tmpInd]));
+					max = Math.max(max, cosineSim(answerList.get(curInd),answerList.get(tmpInd)));
 				}
 				double mSim = lamda*(qaSim-(1-lamda)*max);
 				//double mSim = lamda*qaSim-(1-lamda)*max;
