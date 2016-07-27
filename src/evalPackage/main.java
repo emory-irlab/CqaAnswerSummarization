@@ -25,6 +25,8 @@ public class main {
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\output.txt";
 	static String qAnsFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\qAnsFile.txt";
+	
+	static int finalLength = 10000;
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
 	    FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
@@ -65,16 +67,37 @@ public class main {
 			//***************ranking*******************//
 			int[] order = ranking.random(curQuesiton, curAnswers, 1);//random--seed
           	//int[] order = ranking.bm25(curQuesiton, curAnswers);//bm25
-            //int[] order = ranking.mmr(curQuesiton, curAnswers, 0.9);//mmr lamda	
+            //int[] order = ranking.mmr(curQuesiton, curAnswers, 0.6);//mmr lamda	
 			
-			ArrayList<Double> newRate = new ArrayList<>();
+			//******merge complete answer************//
+			int next = 0;
+			StringBuilder answerBuilder = new StringBuilder();
+			while((answerBuilder.length()<finalLength) && (next<order.length))
+				answerBuilder.append(curAnswers[order[next++]]);
+			String answerString;
+			if(answerBuilder.length()>finalLength) answerString=answerBuilder.substring(0, finalLength);
+			else answerString = answerBuilder.toString();
+			
+			
+/*			//how many apsect this merged answer contains
+			ArrayList<ArrayList<String>> cluster = clusterCollection.get(i);
+			int aspectsNum = stringAspects(answerString, cluster);
+			double ttttt = (double)aspectsNum/cluster.size();
+			System.out.println((i+1)+". aspects£º" + aspectsNum+"; total: "+cluster.size()+"; percentage: "+ ttttt);
+			result.add(ttttt);*/
+			ArrayList<ArrayList<String>> cluster = clusterCollection.get(i);
+			double score = eval.testEval(answerString, cluster, 0.2);//answer, cluster, alpha
+			System.out.println((i+1)+".  "+score);
+			result.add(score);
+/*			ArrayList<Double> newRate = new ArrayList<>();
 			ArrayList<int[]> newNeggets = new ArrayList<>();			
 			for(int x=0; x<rate.length;x++)
 			{
 				newRate.add(rate[order[x]]);
 				newNeggets.add(neggets.get(order[x]));
       		}
-			//***************evaluation*******************//
+			//***************evaluation*******************/
+			/*
           	double score = eval.a_ndcg(newRate, newNeggets, rate.length-1);//alpha-ndcg
       		//double score = eval.nerr_ia(newRate, newNeggets, maxProp);//err-ia-normalized
           	//double score = eval.err_ia(newRate, newNeggets, maxProp);
@@ -82,7 +105,7 @@ public class main {
       		//double score = eval.support_focused(newRate, newNeggets);//support-focused
       		//double score = testeval.nerr(newRate, newNeggets, maxProp);
       		//double score = testeval.alpha_dcg(newRate, newNeggets, rate.length-1);
-          	result.add(score);
+          	result.add(score);*/
 		}
 		System.out.println("average£º" + average_eval(result));
       ps1.close();
@@ -95,6 +118,25 @@ public class main {
       System.out.println("average£º" + sum/rrrr.length);
       */
       System.out.println("finishied!");
+	}
+
+	public static int stringAspects(String s, ArrayList<ArrayList<String>> cluster)
+	{
+		int result = 0;
+		s = stringProcess(s);
+		for(int i=0; i<cluster.size(); i++)
+		{
+			ArrayList<String> aspect = cluster.get(i);
+			for(int j=0; j<aspect.size(); j++)
+			{
+				if(s.contains(aspect.get(j)))
+				{
+					result++;
+					break;
+				}
+			}
+		}		
+		return result;
 	}
 
 	public static FileWriter write_out(String Path) throws IOException
@@ -119,6 +161,7 @@ public class main {
 		for(double score: scores)	sum += score;
 		return sum/(double)scores.size();
 	}
+	
 	public static int getQueAnsClu(String rw, String prop, ArrayList<String> questionCollection ,	
 			ArrayList<String[]> answersCollection,	ArrayList<ArrayList<ArrayList<String>>> clusterCollection )
 	{
@@ -181,6 +224,7 @@ public class main {
       } catch (ParseException e) {e.printStackTrace();}
       return collectionSize;
 	}
+	
 	public static void getAspects(ArrayList<String> questionCollection , ArrayList<String[]> answersCollection,	ArrayList<ArrayList<ArrayList<String>>> clusterCollection, 
 			ArrayList<double[]> rateCollection, ArrayList<ArrayList<int[]>> neggetsCollection)
 	{
@@ -217,6 +261,7 @@ public class main {
 			neggetsCollection.add(neggets);
 		}
 	}
+	
 	public static String stringProcess(String s)
 	{
 		StringBuilder sb = new StringBuilder();		

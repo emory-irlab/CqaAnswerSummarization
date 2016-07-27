@@ -29,9 +29,10 @@ public class ranking {
 	public static int[] mmr(String question, String[] anwsers, double lamda) throws IOException
 	{
 		myBM25 rk = new myBM25(question, anwsers);
-		//return rk.mmr_bm25based(lamda);
+		return rk.mmr_bm25based(lamda);
 		//return rk.mmr_simbased(lamda);
-		return rk.mmr_mixsim(lamda);
+		//return rk.mmr_mixsim(lamda);
 		
 	}
+
 }

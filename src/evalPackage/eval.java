@@ -23,4 +23,9 @@ public class eval {
 	{
 		return support.supportMetric(scores, nuggets);
 	}
+	public static double testEval(String s, ArrayList<ArrayList<String>> cluster, double alpha)
+	{
+		testeval neweval = new testeval(alpha);
+		return neweval.performance(s, cluster);
+	}
 }
