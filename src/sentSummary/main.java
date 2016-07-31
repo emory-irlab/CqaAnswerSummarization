@@ -20,7 +20,7 @@ public class main {
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
 	static int answerLength=500;
-	static int sentLength = 7;
+	static int sentLength = 10;
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
 	    FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
@@ -36,45 +36,29 @@ public class main {
 		
 		//************read necessary info from JSON file*********************//
 		int collectionSize = getQueAnsClu(rw, prop, questionCollection, answersCollection, ansSentCollection, clusterCollection);
-		
-		
 		/**************cal every answers' aspects**************/
 		ArrayList<double[]> rateCollection = new ArrayList<>();
 		ArrayList<ArrayList<int[]>> neggetsCollection = new ArrayList<>();
 
 		getAspects(questionCollection, ansSentCollection, clusterCollection, rateCollection, neggetsCollection);
-		/***********************************************
-		 * qCollect     sentC       rateC   neggetsC
-		 * question1----sentence1----rate----[n1, n2, ...]
-		 *          ----sentence2----rate----[n1, n2, ...]
-		 * question2----sentence1----rate----[n1, n2, ...]
-		 *          ----sentence2----rate----[n1, n2, ...]
-		 ***********************************************/
 		//*******work
 		ArrayList<Double> result = new ArrayList<>();
-		for(int i=0; i<questionCollection.size();i++)
+		for(int i=0; i<questionCollection.size();i++)//every single question in the dataset
 		{
 			String curQuesiton = questionCollection.get(i);			
 			ArrayList<String> ansSent = new ArrayList<>();
 			ansSent.addAll(ansSentCollection.get(i));
-			
-			double[] rate = rateCollection.get(i);
-			ArrayList<int[]> neggets = neggetsCollection.get(i);
+
 			
 			//***************ranking*******************//
 			ranking rk = new ranking();
 			//int[] sentRank = rk.bm25(curQuesiton, ansSent);
 			int[] sentRank = rk.mmr(curQuesiton, ansSent, 1);
 			//System.out.println("question "+i+". "+formedAnswer);
-			StringBuilder formedAnswer = new StringBuilder();
-			int n=0;
-			while(formedAnswer.length()<answerLength)
-			{				
-				formedAnswer.append(ansSent.get(sentRank[n++]));
-				if(n>=ansSent.size()) break;
-			}			
-			String finalAnswer =  formedAnswer.toString();
-			//*******evaluation*******//
+			
+			String finalAnswer = mergingAnswer(ansSent, sentRank, answerLength);			
+			
+			//*******evaluation*******//			
 			evaluation eval = new evaluation();
 			double score = eval.alpha_ndcg_length(sentRank, ansSent, rateCollection.get(i), neggetsCollection.get(i), answerLength);
 			result.add(score);
@@ -254,6 +238,19 @@ public class main {
 			}
 			if(!tmp.equals(" ")) ansSent.add(tmp);
 		}
+	}
+	
+	public static String mergingAnswer(ArrayList<String> ansSent, int[] order, int length)
+	{
+		StringBuilder sb = new StringBuilder();
+		int n=0;
+		while(sb.length()<length)
+		{				
+			sb.append(ansSent.get(order[n++]));
+			if(n>=ansSent.size()) break;
+		}
+		if(sb.length()>length) return sb.substring(0, length);
+		else return sb.toString();
 	}
 }
 
