@@ -2,8 +2,10 @@ package sentSummary;
 
 import java.util.ArrayList;
 
+import evalPackage.testeval;
+
 public class evaluation {
-	public double alpha_ndcg_length(int[] order, ArrayList<String> ansSents, 
+	/*public double alpha_ndcg_length(int[] order, ArrayList<String> ansSents, 
 			double[] scores, ArrayList<int[]> neggets, int length)
 	{
 		int[] sentLength = new int[ansSents.size()];
@@ -17,5 +19,11 @@ public class evaluation {
 			newNeggets.add(neggets.get(tmp));
 		}
 		return alpha_ndcgAtLength.alphandcg(sentLength, newScores, newNeggets, length);
+	}*/
+	
+	public double sumEval(String s, ArrayList<ArrayList<String>> cluster, double alpha)
+	{
+		sumEval_alpha neweval = new sumEval_alpha(alpha);
+		return neweval.performance(s, cluster);
 	}
 }

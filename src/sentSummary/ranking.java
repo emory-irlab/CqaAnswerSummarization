@@ -5,24 +5,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class ranking {
-
+public class ranking {	
 	public int[] bm25(String question, ArrayList<String> anwsers) throws IOException
 	{
 		sentBM25 rk = new sentBM25(question, anwsers);
 		return rk.aBM25();
 	}
 
-	public int[] random(String question, String[] anwsers, int seed)
+	public int[] random(String question, ArrayList<String> anwsers, int seed)
 	{
-		int[] order = new int[anwsers.length];
+		int[] order = new int[anwsers.size()];
 		
 		ArrayList<Integer> temp = new ArrayList<>();
-		for(int x=0;x<anwsers.length;x++)  temp.add(x);
+		for(int x=0;x<anwsers.size();x++)  temp.add(x);
 		
 		Random rn = new Random(seed);
 		int i=0;
-		for(int x=anwsers.length; x>0;x--)
+		for(int x=anwsers.size(); x>0;x--)
 			order[i++] = temp.remove(rn.nextInt(x));
 		return order;
 	}

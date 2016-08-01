@@ -19,11 +19,11 @@ public class main {
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
-	static int answerLength=1000;
-	static int sentLength = 10;
+	static int answerLength=6000;
+	static int sentLength = 5;
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
-	    FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
+	    //FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
 		//**************************used to store all q and a***************************************//
 		ArrayList<String> questionCollection = new ArrayList<>();
 		ArrayList<String[]> answersCollection = new ArrayList<>();
@@ -49,9 +49,10 @@ public class main {
 			ArrayList<String> ansSent = new ArrayList<>();
 			ansSent.addAll(ansSentCollection.get(i));
 
-			
+			ArrayList<ArrayList<String>> cluster = clusterCollection.get(i);
 			//***************ranking*******************//
 			ranking rk = new ranking();
+			//int[] sentRank = rk.random(curQuesiton, ansSent, 1);
 			//int[] sentRank = rk.bm25(curQuesiton, ansSent);
 			int[] sentRank = rk.mmr(curQuesiton, ansSent, 1);
 			//System.out.println("question "+i+". "+formedAnswer);
@@ -60,12 +61,12 @@ public class main {
 			
 			//*******evaluation*******//			
 			evaluation eval = new evaluation();
-			double score = eval.alpha_ndcg_length(sentRank, ansSent, rateCollection.get(i), neggetsCollection.get(i), answerLength);
+			double score = eval.sumEval(finalAnswer, cluster, 0.6);
 			result.add(score);
-			ps1.append("question "+(i+1)+".\t"+score+"\t"+stringProcess(finalAnswer)+"\n");
+			//ps1.append("question "+(i+1)+".\t"+score+"\t"+stringProcess(finalAnswer)+"\n");
 		}
 	  System.out.println("average£º" + average_eval(result));
-      ps1.close();
+      //ps1.close();
       System.out.println("finishied!");
 	}
 

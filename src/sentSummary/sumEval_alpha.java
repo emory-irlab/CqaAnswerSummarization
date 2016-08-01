@@ -1,12 +1,10 @@
 package sentSummary;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 
-public class alpha_ndcgAtLength {
+public class sumEval_alpha {
 	double alpha;
-	public  alpha_ndcgAtLength(double a)
+	public  sumEval_alpha(double a)
 	{
 		this.alpha = a;
 	}
