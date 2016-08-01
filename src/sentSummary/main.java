@@ -19,11 +19,11 @@ public class main {
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
-	static int answerLength=6000;
+	static int answerLength=200;
 	static int sentLength = 5;
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
-	    //FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
+	   // FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
 		//**************************used to store all q and a***************************************//
 		ArrayList<String> questionCollection = new ArrayList<>();
 		ArrayList<String[]> answersCollection = new ArrayList<>();
@@ -41,8 +41,18 @@ public class main {
 		ArrayList<ArrayList<int[]>> neggetsCollection = new ArrayList<>();
 
 		getAspects(questionCollection, ansSentCollection, clusterCollection, rateCollection, neggetsCollection);
+		
+		//cv
+		lamdaToner lt = new lamdaToner(questionCollection, ansSentCollection, clusterCollection, 5, 0, 1, 0.1, answerLength);
+		double[] r = lt.work();
+		double print = 0;
+		for(double tmp: r)
+		{
+			print += tmp;
+		}
+		System.out.println(print/r.length);
 		//*******work
-		ArrayList<Double> result = new ArrayList<>();
+/*		ArrayList<Double> result = new ArrayList<>();
 		for(int i=0; i<questionCollection.size();i++)//every single question in the dataset
 		{
 			String curQuesiton = questionCollection.get(i);			
@@ -50,23 +60,30 @@ public class main {
 			ansSent.addAll(ansSentCollection.get(i));
 
 			ArrayList<ArrayList<String>> cluster = clusterCollection.get(i);
-			//***************ranking*******************//
+			
+			int lllll = 0;
+			for(String ans: ansSent)
+			{
+				lllll += ans.length();
+			}
+		//	ps1.append("question "+(i+1)+".\t"+lllll+"\t"+"\n");
+			//***************ranking*******************
 			ranking rk = new ranking();
 			//int[] sentRank = rk.random(curQuesiton, ansSent, 1);
 			//int[] sentRank = rk.bm25(curQuesiton, ansSent);
-			int[] sentRank = rk.mmr(curQuesiton, ansSent, 1);
+			int[] sentRank = rk.mmr(curQuesiton, ansSent, 0.6);
 			//System.out.println("question "+i+". "+formedAnswer);
 			
 			String finalAnswer = mergingAnswer(ansSent, sentRank, answerLength);			
 			
-			//*******evaluation*******//			
+			//*******evaluation*******			
 			evaluation eval = new evaluation();
 			double score = eval.sumEval(finalAnswer, cluster, 0.6);
 			result.add(score);
 			//ps1.append("question "+(i+1)+".\t"+score+"\t"+stringProcess(finalAnswer)+"\n");
 		}
-	  System.out.println("average£º" + average_eval(result));
-      //ps1.close();
+	  System.out.println("average£º" + average_eval(result));*/
+    //  ps1.close();
       System.out.println("finishied!");
 	}
 
