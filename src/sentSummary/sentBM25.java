@@ -1,6 +1,7 @@
 package sentSummary;
 
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +13,8 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
+import org.deeplearning4j.models.word2vec.Word2Vec;
 
 public class sentBM25 {
 	static String question;
@@ -287,5 +290,18 @@ public class sentBM25 {
 			result[i] = (int) pair.get(i)[1];
 		return result;
 	}
+	
+	
+	
+	
+	
+/*	public double w2vSim(String w1, String w2)
+	{
+		File gModel = new File("E:\\CScourse\\summer_project\\pre_trained_word2vec\\GoogleNews-vectors-negative300.bin.gz");
+	    Word2Vec vec = WordVectorSerializer.loadGoogleModel(gModel, true);
+	    
+	    
+		return
+	}*/
 }
 

@@ -48,9 +48,9 @@ public class lamdaToner {
 		ArrayList<Double> avgScore = new ArrayList<>();
 		lamda = lamda_low;
 		while(lamda<=lamda_high){
-			System.out.println("lamda: "+lamda);
+			
 			ArrayList<Double> scores = new ArrayList<>();
-			for(int i=0; i<allData.length; i++){
+			for(int i=0; i<allData.length; i++){				
 				if(i==test) continue;
 				for(int j=0; j<allData[0].length; j++){
 					String question = allQuestions.get(allData[i][j]);
@@ -74,12 +74,17 @@ public class lamdaToner {
 			para.add(lamda);
 			//System.out.println(lamda);
 			avgScore.add(average);
+			System.out.println("lamda: "+lamda+"; score: "+average);
+			
 			lamda += lamda_step;
 		}
 		double maxScore = 0;
 		for(int l=0; l<para.size(); l++){
 			if(maxScore<avgScore.get(l))
+			{
 				lamda = para.get(l);
+				maxScore = avgScore.get(l);
+			}
 		}
 	}
 	//apply to test data
