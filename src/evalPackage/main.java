@@ -31,6 +31,7 @@ public class main {
 		/**********************out put file******************************/           	  
 	    FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
 		FileWriter ps2 = write_out(qAnsFile);	//rated question and answers (re-order)
+
 		//**************************used to store all q and a***************************************//
 		ArrayList<String> questionCollection = new ArrayList<>();
 		ArrayList<String[]> answersCollection = new ArrayList<>();
@@ -56,6 +57,33 @@ public class main {
 		 * question2----answer1----rate----[n1, n2, ...]
 		 *          ----answer2----rate----[n1, n2, ...]
 		 ***********************************************/
+		//write to ps1
+/*		for(int i=0; i<questionCollection.size();i++)
+		{
+			String curQuesiton = questionCollection.get(i);
+			String[] curAnswers = answersCollection.get(i);
+			double[] rate = rateCollection.get(i);
+			ArrayList<int[]> neggets = neggetsCollection.get(i);
+			ps1.append("QUESTION "+i+"\t"+stringProcess(curQuesiton)+"\n");
+			for(int j=0; j<curAnswers.length; j++)
+			{				
+				int[] ngt = neggetsCollection.get(i).get(j);
+				StringBuilder ss = new StringBuilder();
+				ss.append("[");
+				for(int k=0; k<ngt.length;k++)
+				{
+					Integer t = new Integer(ngt[k]);
+					ss.append(t.toString());
+					ss.append(", ");
+				}
+				ss.append("]");
+				
+				ps1.append("ans "+j+"\t"+rate[j]+"\t"+ss.toString()+"\t"+stringProcess(curAnswers[j])+"\n");
+			}
+			
+		}*/
+		
+		
 		//*******work
 		ArrayList<Double> result = new ArrayList<>();
 		for(int i=0; i<questionCollection.size();i++)
@@ -64,19 +92,28 @@ public class main {
 			String[] curAnswers = answersCollection.get(i);
 			double[] rate = rateCollection.get(i);
 			ArrayList<int[]> neggets = neggetsCollection.get(i);
+			ArrayList<ArrayList<String>> cluster = clusterCollection.get(i);
+			
 			//***************ranking*******************//
-			int[] order = ranking.random(curQuesiton, curAnswers, 1);//random--seed
+			//int[] order = ranking.random(curQuesiton, curAnswers, 1);//random--seed
           	//int[] order = ranking.bm25(curQuesiton, curAnswers);//bm25
-            //int[] order = ranking.mmr(curQuesiton, curAnswers, 0.6);//mmr lamda	
+            int[] order = ranking.mmr(curQuesiton, curAnswers, 1);//mmr lamda	
+
+			
+			//************best possible answer--greedy*********//
+			//int[] bestOrder = ranking.best(curQuesiton, curAnswers, cluster);			
+			int[] bestOrder = ranking.best2(rate, curAnswers);
+			/*for(int j=0; j<bestOrder.length; j++)			
+				System.out.print(bestOrder[j]+", ");			
+			System.out.print("\n");*/
+			
 			
 			//******merge complete answer************//
-			int next = 0;
-			StringBuilder answerBuilder = new StringBuilder();
-			while((answerBuilder.length()<finalLength) && (next<order.length))
-				answerBuilder.append(curAnswers[order[next++]]);
-			String answerString;
-			if(answerBuilder.length()>finalLength) answerString=answerBuilder.substring(0, finalLength);
-			else answerString = answerBuilder.toString();
+			ps2.append("QUESTION No."+(1+i)+"\t"+stringProcess(curQuesiton)+"\n");
+			ps2.append("         ANS: ");
+			String finalAns = mergingAnswer(ps2, curAnswers, order, finalLength);
+			ps2.append("         BST: ");
+			String bestAns = mergingAnswer(ps2, curAnswers, bestOrder, finalLength);
 			
 			
 /*			//how many apsect this merged answer contains
@@ -85,10 +122,16 @@ public class main {
 			double ttttt = (double)aspectsNum/cluster.size();
 			System.out.println((i+1)+". aspects£º" + aspectsNum+"; total: "+cluster.size()+"; percentage: "+ ttttt);
 			result.add(ttttt);*/
-			ArrayList<ArrayList<String>> cluster = clusterCollection.get(i);
-			double score = eval.testEval(answerString, cluster, 0.2);//answer, cluster, alpha
-			System.out.println((i+1)+".  "+score);
-			result.add(score);
+			int aspectsNum = stringAspects(finalAns, cluster);
+			int aspectsNum2 = stringAspects(bestAns, cluster);
+			//System.out.println(i+".  "+aspectsNum+"\tBest: "+aspectsNum2);
+			//result.add((double)(aspectsNum)/(aspectsNum2));
+			
+			double score = eval.testEval(finalAns, cluster, 0.5);//answer, cluster, alpha
+			double bestScore = eval.testEval(bestAns, cluster, 0.5);
+			
+			System.out.println((i+1)+".  "+score+"\tBest: "+bestScore+"\tRatio: "+score/bestScore);
+			result.add(score/bestScore);
 /*			ArrayList<Double> newRate = new ArrayList<>();
 			ArrayList<int[]> newNeggets = new ArrayList<>();			
 			for(int x=0; x<rate.length;x++)
@@ -107,7 +150,9 @@ public class main {
       		//double score = testeval.alpha_dcg(newRate, newNeggets, rate.length-1);
           	result.add(score);*/
 		}
-		System.out.println("average£º" + average_eval(result));
+		double ffff = average_eval(result);
+		System.out.println("average£º" + ffff);
+		ps2.append("\nscore: "+ ffff + "; alpha: 0.5; "+"random");
       ps1.close();
       ps2.close();
       /*add
@@ -123,7 +168,7 @@ public class main {
 	public static int stringAspects(String s, ArrayList<ArrayList<String>> cluster)
 	{
 		int result = 0;
-		s = stringProcess(s);
+		//s = stringProcess(s);//////////////////////////////
 		for(int i=0; i<cluster.size(); i++)
 		{
 			ArrayList<String> aspect = cluster.get(i);
@@ -158,7 +203,10 @@ public class main {
 	public static double average_eval(ArrayList<Double> scores)
 	{
 		double sum = 0;
-		for(double score: scores)	sum += score;
+		for(double score: scores)	
+		{
+			sum += score;
+		}
 		return sum/(double)scores.size();
 	}
 	
@@ -190,11 +238,15 @@ public class main {
 	          	String body = question.containsKey("body")?question.get("body").toString():"";
 	          	String questionString = title+" "+body;
 	          	
-	          	questionCollection.add(questionString);
+	          	questionCollection.add(questionString);////////////////////////////////
 	          	//*********store all the answers
 	          	String[] curAnswers = new String[answers.size()];
 	          	for(int j=0; j<answers.size(); j++)
-	          		curAnswers[j] = answers.get(j).toString();
+	          	{
+	          		//curAnswers[j] = answers.get(j).toString();
+	          		JSONObject answer = (JSONObject)answers.get(j);
+	          		curAnswers[j] = answer.get("answer_text").toString();////////////////////////////////////
+	          	}
 	          	answersCollection.add(curAnswers);
 	          	
 	          	//***********find & store its cluster
@@ -237,10 +289,10 @@ public class main {
 			double[] rate = new double[curAnswers.length];
 			ArrayList<int[]> neggets = new ArrayList<>();
 			
-			curQuesiton = stringProcess(curQuesiton);			
+			//curQuesiton = stringProcess(curQuesiton);	///////////////////////////	
 			for(int j=0; j<curAnswers.length; j++)//every answer
 			{
-				String ans = stringProcess(curAnswers[j]);
+				String ans = curAnswers[j];////////////////////
 				double count = 0;
 				int[] negget = new int[curCluster.size()];
 				Arrays.fill(negget, 0);
@@ -249,10 +301,11 @@ public class main {
 					ArrayList<String> aspect = curCluster.get(k);
 					for(int l=0; l<aspect.size(); l++)
 					{
-						String p = aspect.get(l).trim().toLowerCase();
+						//String p = aspect.get(l).trim().toLowerCase();/////////////////////////
+						String p = aspect.get(l);
 						if(ans.contains(p)) negget[k]++;
 					}
-					count += negget[k]==0?0:1;
+					if(negget[k]!=0) count++;
 				}
 				rate[j] = count;
 				neggets.add(negget);
@@ -278,6 +331,20 @@ public class main {
 		}
 		return sb.toString();
 	}
-	
+	public static String mergingAnswer(FileWriter ps2, String[] ans, int[] order, int length) throws IOException
+	{
+		StringBuilder sb = new StringBuilder();
+		int n=0;
+		while(sb.length()<length)
+		{				
+			sb.append(ans[order[n++]]);///////////////////////
+			sb.append(". ");
+			if(n>=ans.length) break;
+		}
+		//if(sb.length()>length) return sb.substring(0, length);
+		//else return sb.toString();
+		ps2.append(stringProcess(sb.toString())+"\n");
+		return sb.toString();
+	}
 }
 

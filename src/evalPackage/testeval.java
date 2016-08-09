@@ -28,8 +28,7 @@ public class testeval {
 					result += Math.pow((1-alpha), num++);
 				}
 			}
-		}
-		
+		}		
 		return result;
 	}
 }

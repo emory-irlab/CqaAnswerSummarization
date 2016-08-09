@@ -6,6 +6,18 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class ranking {
+	
+	public static int[] best(String question, String[] anwsers, ArrayList<ArrayList<String>> cluster)
+	{
+		bestPerf bf = new bestPerf(question, anwsers, cluster);
+		return bf.rank();
+	}
+
+	public static int[] best2(double[] rate, String[] anwsers)
+	{
+		bestPerf bf = new bestPerf(rate, anwsers);
+		return bf.rank2();
+	}
 
 	public static int[] bm25(String question, String[] anwsers) throws IOException
 	{

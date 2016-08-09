@@ -6,7 +6,7 @@ import java.util.LinkedList;
 
 public class alpha_ndcgAtLength {
 	double alpha;
-	public  alpha_ndcgAtLength(double a)
+	public alpha_ndcgAtLength(double a)
 	{
 		this.alpha = a;
 	}
@@ -30,8 +30,8 @@ public class alpha_ndcgAtLength {
 					result += Math.pow((1-alpha), num++);
 				}
 			}
-		}
-		
+		}		
 		return result;
 	}
+	
 }

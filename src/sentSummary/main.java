@@ -69,18 +69,18 @@ public class main {
 		//	ps1.append("question "+(i+1)+".\t"+lllll+"\t"+"\n");
 			//***************ranking*******************
 			ranking rk = new ranking();
-			//int[] sentRank = rk.random(curQuesiton, ansSent, 1);
+			int[] sentRank = rk.random(curQuesiton, ansSent, 1);
 			//int[] sentRank = rk.bm25(curQuesiton, ansSent);
-			int[] sentRank = rk.mmr(curQuesiton, ansSent, 0.3);
+			//int[] sentRank = rk.mmr(curQuesiton, ansSent, 0.3);
 			
 			
 			String finalAnswer = mergingAnswer(ansSent, sentRank, answerLength);			
-			ps1.append("question "+i+". "+finalAnswer+"\n");
+			//ps1.append("question "+i+". "+finalAnswer+"\n");
 			//*******evaluation*******			
 			evaluation eval = new evaluation();
 			double score = eval.sumEval(finalAnswer, cluster, 0.6);
 			result.add(score);
-			//ps1.append("question "+(i+1)+".\t"+score+"\t"+stringProcess(finalAnswer)+"\n");
+			ps1.append("score: "+score+"\t"+stringProcess(finalAnswer)+"\n");
 		}
 	  System.out.println("average£º" + average_eval(result));
       ps1.close();
