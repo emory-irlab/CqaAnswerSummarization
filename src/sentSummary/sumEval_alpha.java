@@ -24,8 +24,8 @@ public class sumEval_alpha {
 			{
 				if(s.contains(aspect.get(j)))
 				{
-					//result += Math.pow((1-alpha), num++);
-					result++;
+					result += Math.pow((1-alpha), num++);
+					//result++;
 				}
 			}
 		}		

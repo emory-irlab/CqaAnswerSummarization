@@ -20,7 +20,7 @@ public class main {
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
-	static int answerLength=600;
+	static int answerLength=100;
 	static int sentLength = 5;
 	static double lamda = 0;
 	static double alpha = 0.5;
@@ -45,17 +45,17 @@ public class main {
 		ArrayList<ArrayList<ArrayList<ArrayList<int[]>>>> nglocCollection = new ArrayList<>();
 
 		getAspects(questionCollection, ansSentCollection, clusterCollection, rateCollection, neggetsCollection, nglocCollection);
-		/**************************************************************
-		 * qCollect     ansC       sentC    rateC     neggetsC
-		 * question1----answer1----sent1----rate1----[n1, n2, ...]
-		 *                     ----sent2----rate2----[n1, n2, ...]
-		 *          ----answer2----sent1----rate1----[n1, n2, ...]
-		 *                     ----sent2----rate2----[n1, n2, ...]
-		 * question2----answer1----sent1----rate1----[n1, n2, ...]
-		 *                     ----sent2----rate2----[n1, n2, ...]
-		 *          ----answer2----sent1----rate1----[n1, n2, ...]
-		 *                     ----sent2----rate2----[n1, n2, ...]
-		 ************************************************************/
+		//----------------------------------------------------------
+		// qCollect     ansC       sentC    rateC     neggetsC
+		//  question1----answer1----sent1----rate1----[n1, n2, ...]
+		//                      ----sent2----rate2----[n1, n2, ...]
+		//           ----answer2----sent1----rate1----[n1, n2, ...]
+		//                      ----sent2----rate2----[n1, n2, ...]
+		//  question2----answer1----sent1----rate1----[n1, n2, ...]
+		//                      ----sent2----rate2----[n1, n2, ...]
+		//           ----answer2----sent1----rate1----[n1, n2, ...]
+		//                      ----sent2----rate2----[n1, n2, ...]
+		//----------------------------------------------------------
 /*		
 		//cv
 		lamdaToner lt = new lamdaToner(questionCollection, ansSentCollection, clusterCollection, 5, 0, 1, 0.1, answerLength);
@@ -78,8 +78,8 @@ public class main {
 			ArrayList<ArrayList<ArrayList<int[]>>> nglocs = nglocCollection.get(i); 
 			//--------------------ranking--------------------
 			rankSent rk = new rankSent(curQuesiton, ansSent, nglocs, answerLength);
-			String sentAns = rk.random();
-			//String sentAns = rk.bm25();
+			//String sentAns = rk.random();
+			String sentAns = rk.bm25();
 			//String sentAns = rk.mmr(lamda);
 			
 			//************best possible answer--greedy*********//
@@ -236,11 +236,8 @@ public class main {
 							int addLength = start==-1?0:p.length();
 							loc[l] = curSentence.indexOf(p) + addLength;//end
 						}
-						if(negget[k]!=0) 
-						{
-							count++;
-							locs.add(loc);
-						}
+						if(negget[k]!=0) count++;
+						locs.add(loc);
 					}
 					rate[j] = count;
 					neggets.add(negget);
