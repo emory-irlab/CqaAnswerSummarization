@@ -14,17 +14,11 @@ public class testeval {
 		for(int i=0; i<cluster.size(); i++)
 		{
 			ArrayList<String> aspect = cluster.get(i);
-			boolean first = true;
 			int num = 0;
 			for(int j=0; j<aspect.size(); j++)
 			{
 				if(s.contains(aspect.get(j)))
 				{
-					if(first) 
-					{
-						num=0;
-						first = false;
-					}
 					result += Math.pow((1-alpha), num++);
 				}
 			}

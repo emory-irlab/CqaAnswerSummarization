@@ -1,4 +1,4 @@
-package sentSummary;
+/*package sentSummary;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -116,9 +116,9 @@ public class lamdaToner {
 		double[] result = new double[kfd];
 		//split dataset
 		int[][] dataPartition = split(allAnswers.size());
-/*		for(int i=0; i<dataPartition.length; i++)
+		for(int i=0; i<dataPartition.length; i++)
 			for(int j=0; j<dataPartition[0].length; j++)
-				System.out.println(dataPartition[i][j]);*/
+				System.out.println(dataPartition[i][j]);
 		//train and test
 		for(int i=0; i<kfd; i++)
 		{
@@ -144,3 +144,4 @@ public class lamdaToner {
 		else return sb.toString();
 	}
 }
+*/

@@ -12,6 +12,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import edu.stanford.nlp.simple.*;
+import evalPackage.ranking;
 //import evalPackage.ranking;
 import evalPackage.readJasonFile;
 
@@ -19,15 +20,17 @@ public class main {
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
-	static int answerLength=1500;
+	static int answerLength=600;
 	static int sentLength = 5;
+	static double lamda = 0;
+	static double alpha = 0.5;
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
 	   FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
 		//**************************used to store all q and a***************************************//
 		ArrayList<String> questionCollection = new ArrayList<>();
 		ArrayList<String[]> answersCollection = new ArrayList<>();
-		ArrayList<ArrayList<String>> ansSentCollection = new ArrayList<>();
+		ArrayList<ArrayList<ArrayList<String>>> ansSentCollection = new ArrayList<>();
 		ArrayList<ArrayList<ArrayList<String>>> clusterCollection = new ArrayList<>();		
 
 		/***********************read file**********************************/	
@@ -37,10 +40,22 @@ public class main {
 		//************read necessary info from JSON file*********************//
 		int collectionSize = getQueAnsClu(rw, prop, questionCollection, answersCollection, ansSentCollection, clusterCollection);
 		/**************cal every answers' aspects**************/
-		ArrayList<double[]> rateCollection = new ArrayList<>();
-		ArrayList<ArrayList<int[]>> neggetsCollection = new ArrayList<>();
+		ArrayList<ArrayList<double[]>> rateCollection = new ArrayList<>();
+		ArrayList<ArrayList<ArrayList<int[]>>> neggetsCollection = new ArrayList<>();
+		ArrayList<ArrayList<ArrayList<ArrayList<int[]>>>> nglocCollection = new ArrayList<>();
 
-		getAspects(questionCollection, ansSentCollection, clusterCollection, rateCollection, neggetsCollection);
+		getAspects(questionCollection, ansSentCollection, clusterCollection, rateCollection, neggetsCollection, nglocCollection);
+		/**************************************************************
+		 * qCollect     ansC       sentC    rateC     neggetsC
+		 * question1----answer1----sent1----rate1----[n1, n2, ...]
+		 *                     ----sent2----rate2----[n1, n2, ...]
+		 *          ----answer2----sent1----rate1----[n1, n2, ...]
+		 *                     ----sent2----rate2----[n1, n2, ...]
+		 * question2----answer1----sent1----rate1----[n1, n2, ...]
+		 *                     ----sent2----rate2----[n1, n2, ...]
+		 *          ----answer2----sent1----rate1----[n1, n2, ...]
+		 *                     ----sent2----rate2----[n1, n2, ...]
+		 ************************************************************/
 /*		
 		//cv
 		lamdaToner lt = new lamdaToner(questionCollection, ansSentCollection, clusterCollection, 5, 0, 1, 0.1, answerLength);
@@ -56,31 +71,32 @@ public class main {
 		for(int i=0; i<questionCollection.size();i++)//every single question in the dataset
 		{
 			String curQuesiton = questionCollection.get(i);			
-			ArrayList<String> ansSent = new ArrayList<>();
-			ansSent.addAll(ansSentCollection.get(i));
-
+			ArrayList<ArrayList<String>> ansSent = ansSentCollection.get(i);
+			ArrayList<double[]> rate = rateCollection.get(i);
+			ArrayList<ArrayList<int[]>> neggets = neggetsCollection.get(i);
 			ArrayList<ArrayList<String>> cluster = clusterCollection.get(i);
+			ArrayList<ArrayList<ArrayList<int[]>>> nglocs = nglocCollection.get(i); 
+			//--------------------ranking--------------------
+			rankSent rk = new rankSent(curQuesiton, ansSent, nglocs, answerLength);
+			String sentAns = rk.random();
+			//String sentAns = rk.bm25();
+			//String sentAns = rk.mmr(lamda);
 			
-/*			int lllll = 0;
-			for(String ans: ansSent)
-			{
-				lllll += ans.length();
-			}*/
-		//	ps1.append("question "+(i+1)+".\t"+lllll+"\t"+"\n");
-			//***************ranking*******************
-			ranking rk = new ranking();
-			int[] sentRank = rk.random(curQuesiton, ansSent, 1);
-			//int[] sentRank = rk.bm25(curQuesiton, ansSent);
-			//int[] sentRank = rk.mmr(curQuesiton, ansSent, 0.3);
+			//************best possible answer--greedy*********//
+			String bestAns = rk.best(alpha);
 			
-			
-			String finalAnswer = mergingAnswer(ansSent, sentRank, answerLength);			
-			//ps1.append("question "+i+". "+finalAnswer+"\n");
 			//*******evaluation*******			
-			evaluation eval = new evaluation();
-			double score = eval.sumEval(finalAnswer, cluster, 0.6);
-			result.add(score);
-			ps1.append("score: "+score+"\t"+stringProcess(finalAnswer)+"\n");
+			evaluation eval = new evaluation(cluster, alpha);
+			double score = eval.sumEval(sentAns);
+			double bestScore = eval.sumEval(bestAns);
+			double ratio = score/bestScore;
+			System.out.println((i+1)+". score: "+score+"; best: "+bestScore+"; ratio: "+ratio);
+			result.add(ratio);
+			ps1.append("Question "+(i+1)+". "+stringProcess(curQuesiton)+"\tscore: "+ratio+"\n");
+			ps1.append("----Answer: "+stringProcess(sentAns)+"\n");
+			stringAspects(sentAns, cluster, ps1);
+			ps1.append("----Best  : "+stringProcess(bestAns)+"\n");
+			stringAspects(bestAns, cluster, ps1);
 		}
 	  System.out.println("average£º" + average_eval(result));
       ps1.close();
@@ -111,7 +127,7 @@ public class main {
 	}
 	
 	public static int getQueAnsClu(String rw, String prop, ArrayList<String> questionCollection ,	
-			ArrayList<String[]> answersCollection,	ArrayList<ArrayList<String>> ansSentCollection, 
+			ArrayList<String[]> answersCollection,	ArrayList<ArrayList<ArrayList<String>>> ansSentCollection, 
 			ArrayList<ArrayList<ArrayList<String>>> clusterCollection )
 	{
 		int collectionSize = 0;
@@ -148,7 +164,8 @@ public class main {
 	          		curAnswers[j] = a.get("answer_text").toString();
 	          	} 
 	          	answersCollection.add(curAnswers);
-          		ArrayList<String> curSent = new ArrayList<>();
+          		//ArrayList<String> curSent = new ArrayList<>();
+          		ArrayList<ArrayList<String>> curSent = new ArrayList<>();
           		answersSplite(curAnswers, curSent, sentLength);
           		ansSentCollection.add(curSent);
 	          	
@@ -180,40 +197,62 @@ public class main {
       return collectionSize;
 	}
 	
-	public static void getAspects(ArrayList<String> questionCollection , ArrayList<ArrayList<String>> ansSentCollection, ArrayList<ArrayList<ArrayList<String>>> clusterCollection, 
-			ArrayList<double[]> rateCollection, ArrayList<ArrayList<int[]>> neggetsCollection)
+	public static void getAspects(ArrayList<String> questionCollection , ArrayList<ArrayList<ArrayList<String>>> ansSentCollection, ArrayList<ArrayList<ArrayList<String>>> clusterCollection, 
+			ArrayList<ArrayList<double[]>> rateCollection, ArrayList<ArrayList<ArrayList<int[]>>> neggetsCollection,
+			ArrayList<ArrayList<ArrayList<ArrayList<int[]>>>> nglocCollection)
 	{
-		for(int i=0; i<questionCollection.size(); i++)
+		for(int i=0; i<questionCollection.size(); i++)//every question
 		{
 			String curQuesiton = questionCollection.get(i);
-			ArrayList<String> curAnswers = ansSentCollection.get(i);
+			ArrayList<ArrayList<String>> curAnswers = ansSentCollection.get(i);//
 			ArrayList<ArrayList<String>> curCluster = clusterCollection.get(i);
 			
-			double[] rate = new double[curAnswers.size()];
-			ArrayList<int[]> neggets = new ArrayList<>();
+			ArrayList<double[]> curRate = new ArrayList<>();
+			ArrayList<ArrayList<int[]>> curNeggets = new ArrayList<>();
+			ArrayList<ArrayList<ArrayList<int[]>>> nglocs = new ArrayList<>();
 			
-			curQuesiton = stringProcess(curQuesiton);			
 			for(int j=0; j<curAnswers.size(); j++)//every answer
 			{
-				String ans = stringProcess(curAnswers.get(j));
-				double count = 0;
-				int[] negget = new int[curCluster.size()];
-				Arrays.fill(negget, 0);
-				for(int k=0; k<curCluster.size(); k++)//exam every aspect
+				ArrayList<String> ans = curAnswers.get(j);
+				double[] rate = new double[curAnswers.size()];
+				ArrayList<int[]> neggets = new ArrayList<>();
+				ArrayList<ArrayList<int[]>> ngloc = new ArrayList<>();
+				for(int x=0; x<ans.size(); x++)//every sentence
 				{
-					ArrayList<String> aspect = curCluster.get(k);
-					for(int l=0; l<aspect.size(); l++)
+					String curSentence = ans.get(x);
+					double count = 0;
+					int[] negget = new int[curCluster.size()];
+					Arrays.fill(negget, 0);
+					ArrayList<int[]> locs = new ArrayList<>();
+					for(int k=0; k<curCluster.size(); k++)//exam every aspect
 					{
-						String p = aspect.get(l).trim().toLowerCase();
-						if(ans.contains(p)) negget[k]++;
+						ArrayList<String> aspect = curCluster.get(k);
+						int[] loc = new int[aspect.size()];
+						for(int l=0; l<aspect.size(); l++)
+						{
+							String p = aspect.get(l);
+							if(curSentence.contains(p)) negget[k]++;
+							int start = curSentence.indexOf(p);
+							int addLength = start==-1?0:p.length();
+							loc[l] = curSentence.indexOf(p) + addLength;//end
+						}
+						if(negget[k]!=0) 
+						{
+							count++;
+							locs.add(loc);
+						}
 					}
-					count += negget[k]==0?0:1;
+					rate[j] = count;
+					neggets.add(negget);
+					ngloc.add(locs);
 				}
-				rate[j] = count;
-				neggets.add(negget);
+				curRate.add(rate);
+				curNeggets.add(neggets);
+				nglocs.add(ngloc);
 			}
-			rateCollection.add(rate);
-			neggetsCollection.add(neggets);
+			rateCollection.add(curRate);
+			neggetsCollection.add(curNeggets);
+			nglocCollection.add(nglocs);
 		}
 	}
 	
@@ -234,41 +273,51 @@ public class main {
 		return sb.toString();
 	}
 	
-	public static void answersSplite(String[] answers, ArrayList<String> ansSent, int minLength)
+	public static void answersSplite(String[] answers, ArrayList<ArrayList<String>> ansSent, int minLength)
 	{
 		for(int i=0; i<answers.length; i++)
 		{
+			ArrayList<String> curAnsSent = new ArrayList<>();//
 			Document doc = new Document(answers[i]);
 			String tmp = " ";
 			for (Sentence sent : doc.sentences())
 			{
-				if(sent.length()>=minLength) 
+		/*		if(sent.length()>=minLength) 
 				{
-					if(tmp.equals(" "))	ansSent.add(sent.toString());
+					if(tmp.equals(" "))	curAnsSent.add(sent.toString());
 					else
 					{
-						ansSent.add(tmp+" "+sent.toString());
+						curAnsSent.add(tmp+" "+sent.toString());
 						tmp = " ";
 					}
 				} 
 				else
-					tmp = sent.toString();
+					tmp = sent.toString();*/
+				curAnsSent.add(sent.toString());
 			}
-			if(!tmp.equals(" ")) ansSent.add(tmp);
+			//if(!tmp.equals(" ")) curAnsSent.add(tmp);
+			ansSent.add(curAnsSent);
 		}
 	}
 	
-	public static String mergingAnswer(ArrayList<String> ansSent, int[] order, int length)
+	public static int stringAspects(String s, ArrayList<ArrayList<String>> cluster, FileWriter ps) throws IOException
 	{
-		StringBuilder sb = new StringBuilder();
-		int n=0;
-		while(sb.length()<length)
-		{				
-			sb.append(ansSent.get(order[n++]));
-			if(n>=ansSent.size()) break;
-		}
-		if(sb.length()>length) return sb.substring(0, length);
-		else return sb.toString();
+		int result = 0;
+		//s = stringProcess(s);//////////////////////////////
+		for(int i=0; i<cluster.size(); i++)
+		{
+			ArrayList<String> aspect = cluster.get(i);
+			for(int j=0; j<aspect.size(); j++)
+			{
+				if(s.contains(aspect.get(j)))
+				{
+					ps.append("  >>> " + aspect.get(j) + "\n");
+					result++;
+					break;
+				}
+			}
+		}		
+		return result;
 	}
 }
 

@@ -26,8 +26,11 @@ public class main {
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\output.txt";
 	static String qAnsFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\qAnsFile.txt";
 	
-	static int finalLength = 200;
+	static int finalLength = 100;
+	static double lamda = 0.1;
+	static double alpha = 0.5;
 	public static void main(String[] args) throws IOException{
+		
 		/**********************out put file******************************/           	  
 	    FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
 		FileWriter ps2 = write_out(qAnsFile);	//rated question and answers (re-order)
@@ -44,19 +47,21 @@ public class main {
 		//************read necessary info from JSON file*********************//
 		int collectionSize = getQueAnsClu(rw, prop, questionCollection, answersCollection, clusterCollection);
 		
-		/**************cal every answers' aspects**************/
+		//-----------------cal every answers' aspects------------------//
 		//ArrayList<ArrayList<Double>> rateCollection = new ArrayList<>();
 		ArrayList<double[]> rateCollection = new ArrayList<>();
 		ArrayList<ArrayList<int[]>> neggetsCollection = new ArrayList<>();
+		ArrayList<ArrayList<ArrayList<int[]>>> ngLocCollection = new ArrayList<>();
 		
-		getAspects(questionCollection, answersCollection, clusterCollection, rateCollection, neggetsCollection);
-		/***********************************************
-		 * qCollect     ansC       rateC   neggetsC
-		 * question1----answer1----rate----[n1, n2, ...]
-		 *          ----answer2----rate----[n1, n2, ...]
-		 * question2----answer1----rate----[n1, n2, ...]
-		 *          ----answer2----rate----[n1, n2, ...]
-		 ***********************************************/
+		getAspects(questionCollection, answersCollection, clusterCollection, rateCollection, neggetsCollection, ngLocCollection);
+		//--------------------------------------------------------
+		// qCollect     ansC       rateC   neggetsC                     ngLoc
+		// question1----answer1----rate----[n1, n2, ...]------apsect1[-1,loc,loc],aspect2[loc, -1, -1]
+		//          ----answer2----rate----[n1, n2, ...]
+		// question2----answer1----rate----[n1, n2, ...]
+		//          ----answer2----rate----[n1, n2, ...]
+		//---------------------------------------------------------
+		
 		//write to ps1
 /*		for(int i=0; i<questionCollection.size();i++)
 		{
@@ -86,6 +91,7 @@ public class main {
 		
 		//*******work
 		ArrayList<Double> result = new ArrayList<>();
+		ArrayList<Double> bestResult = new ArrayList<>();
 		for(int i=0; i<questionCollection.size();i++)
 		{
 			String curQuesiton = questionCollection.get(i);
@@ -93,16 +99,18 @@ public class main {
 			double[] rate = rateCollection.get(i);
 			ArrayList<int[]> neggets = neggetsCollection.get(i);
 			ArrayList<ArrayList<String>> cluster = clusterCollection.get(i);
+			ArrayList<ArrayList<int[]>> ngLocs = ngLocCollection.get(i);
 			
 			//***************ranking*******************//
 			//int[] order = ranking.random(curQuesiton, curAnswers, 1);//random--seed
           	//int[] order = ranking.bm25(curQuesiton, curAnswers);//bm25
-            int[] order = ranking.mmr(curQuesiton, curAnswers, 1);//mmr lamda	
+			//String finalAns = ranking.bm25_loc(curQuesiton, curAnswers, finalLength);
+            //int[] order = ranking.mmr(curQuesiton, curAnswers, lamda);//mmr lamda	
+			String finalAns = ranking.mmr_loc(curQuesiton, curAnswers, lamda, finalLength);
 
 			
-			//************best possible answer--greedy*********//
-			//int[] bestOrder = ranking.best(curQuesiton, curAnswers, cluster);			
-			int[] bestOrder = ranking.best2(rate, curAnswers);
+			//************best possible answer--greedy*********//		
+			String bestAns = ranking.best(ngLocs, curAnswers, finalLength, alpha);
 			/*for(int j=0; j<bestOrder.length; j++)			
 				System.out.print(bestOrder[j]+", ");			
 			System.out.print("\n");*/
@@ -110,10 +118,10 @@ public class main {
 			
 			//******merge complete answer************//
 			ps2.append("QUESTION No."+(1+i)+"\t"+stringProcess(curQuesiton)+"\n");
-			ps2.append("         ANS: ");
-			String finalAns = mergingAnswer(ps2, curAnswers, order, finalLength);
-			ps2.append("         BST: ");
-			String bestAns = mergingAnswer(ps2, curAnswers, bestOrder, finalLength);
+			ps2.append("++++ANS: ");
+			//String finalAns = mergingAnswer(ps2, curAnswers, order, finalLength);
+			ps2.append(stringProcess(finalAns)+"\n");
+
 			
 			
 /*			//how many apsect this merged answer contains
@@ -122,16 +130,20 @@ public class main {
 			double ttttt = (double)aspectsNum/cluster.size();
 			System.out.println((i+1)+". aspects£º" + aspectsNum+"; total: "+cluster.size()+"; percentage: "+ ttttt);
 			result.add(ttttt);*/
-			int aspectsNum = stringAspects(finalAns, cluster);
-			int aspectsNum2 = stringAspects(bestAns, cluster);
+			int aspectsNum = stringAspects(finalAns, cluster, ps2);
+			
+			ps2.append("++++BST: "+stringProcess(bestAns)+"\n");
+			//String bestAns = mergingAnswer(ps2, curAnswers, bestOrder, finalLength);			
+			int aspectsNum2 = stringAspects(bestAns, cluster, ps2);
 			//System.out.println(i+".  "+aspectsNum+"\tBest: "+aspectsNum2);
 			//result.add((double)(aspectsNum)/(aspectsNum2));
 			
-			double score = eval.testEval(finalAns, cluster, 0.5);//answer, cluster, alpha
-			double bestScore = eval.testEval(bestAns, cluster, 0.5);
-			
-			System.out.println((i+1)+".  "+score+"\tBest: "+bestScore+"\tRatio: "+score/bestScore);
-			result.add(score/bestScore);
+			double score = eval.testEval(finalAns, cluster, alpha);//answer, cluster, alpha
+			double bestScore = eval.testEval(bestAns, cluster, alpha);
+			double finalscore = score==0?0:(score/bestScore);
+			System.out.println((i+1)+".  "+score+"\tBest: "+bestScore+"\tRatio: "+finalscore);
+			result.add(finalscore);
+			bestResult.add(bestScore/bestScore);
 /*			ArrayList<Double> newRate = new ArrayList<>();
 			ArrayList<int[]> newNeggets = new ArrayList<>();			
 			for(int x=0; x<rate.length;x++)
@@ -152,7 +164,8 @@ public class main {
 		}
 		double ffff = average_eval(result);
 		System.out.println("average£º" + ffff);
-		ps2.append("\nscore: "+ ffff + "; alpha: 0.5; "+"random");
+		System.out.println("best£º" + average_eval(bestResult));
+		ps2.append("\nscore: "+ ffff + "; alpha: 0.5; "+"random; Length: "+finalLength);
       ps1.close();
       ps2.close();
       /*add
@@ -165,7 +178,7 @@ public class main {
       System.out.println("finishied!");
 	}
 
-	public static int stringAspects(String s, ArrayList<ArrayList<String>> cluster)
+	public static int stringAspects(String s, ArrayList<ArrayList<String>> cluster, FileWriter ps) throws IOException
 	{
 		int result = 0;
 		//s = stringProcess(s);//////////////////////////////
@@ -176,6 +189,7 @@ public class main {
 			{
 				if(s.contains(aspect.get(j)))
 				{
+					ps.append("  >>> " + aspect.get(j) + "\n");
 					result++;
 					break;
 				}
@@ -278,9 +292,9 @@ public class main {
 	}
 	
 	public static void getAspects(ArrayList<String> questionCollection , ArrayList<String[]> answersCollection,	ArrayList<ArrayList<ArrayList<String>>> clusterCollection, 
-			ArrayList<double[]> rateCollection, ArrayList<ArrayList<int[]>> neggetsCollection)
+			ArrayList<double[]> rateCollection, ArrayList<ArrayList<int[]>> neggetsCollection, ArrayList<ArrayList<ArrayList<int[]>>> ngLocCollection)
 	{
-		for(int i=0; i<questionCollection.size(); i++)
+		for(int i=0; i<questionCollection.size(); i++)//every question
 		{
 			String curQuesiton = questionCollection.get(i);
 			String[] curAnswers = answersCollection.get(i);
@@ -288,30 +302,40 @@ public class main {
 			
 			double[] rate = new double[curAnswers.length];
 			ArrayList<int[]> neggets = new ArrayList<>();
-			
-			//curQuesiton = stringProcess(curQuesiton);	///////////////////////////	
+			ArrayList<ArrayList<int[]>> ngLocs = new ArrayList<>();
+
 			for(int j=0; j<curAnswers.length; j++)//every answer
 			{
-				String ans = curAnswers[j];////////////////////
+				String ans = curAnswers[j];
 				double count = 0;
 				int[] negget = new int[curCluster.size()];
 				Arrays.fill(negget, 0);
+				ArrayList<int[]> ngLoc = new ArrayList<>();
 				for(int k=0; k<curCluster.size(); k++)//exam every aspect
 				{
 					ArrayList<String> aspect = curCluster.get(k);
-					for(int l=0; l<aspect.size(); l++)
+					int[] loc = new int[aspect.size()];
+					for(int l=0; l<aspect.size(); l++)//every phrase
 					{
-						//String p = aspect.get(l).trim().toLowerCase();/////////////////////////
 						String p = aspect.get(l);
 						if(ans.contains(p)) negget[k]++;
+						int start = ans.indexOf(p);
+						int addLength = start==-1?0:p.length();
+						loc[l] = ans.indexOf(p) + addLength;//end
 					}
-					if(negget[k]!=0) count++;
+					if(negget[k]!=0)
+					{
+						count++;
+						ngLoc.add(loc);
+					}
 				}
 				rate[j] = count;
 				neggets.add(negget);
+				ngLocs.add(ngLoc);
 			}
 			rateCollection.add(rate);
 			neggetsCollection.add(neggets);
+			ngLocCollection.add(ngLocs);
 		}
 	}
 	
@@ -331,6 +355,7 @@ public class main {
 		}
 		return sb.toString();
 	}
+	
 	public static String mergingAnswer(FileWriter ps2, String[] ans, int[] order, int length) throws IOException
 	{
 		StringBuilder sb = new StringBuilder();
@@ -341,10 +366,11 @@ public class main {
 			sb.append(". ");
 			if(n>=ans.length) break;
 		}
-		//if(sb.length()>length) return sb.substring(0, length);
-		//else return sb.toString();
-		ps2.append(stringProcess(sb.toString())+"\n");
-		return sb.toString();
+		String result = new String();		
+		if(sb.length()>length) result = sb.substring(0, length);
+		else result = sb.toString();		
+		ps2.append(stringProcess(result)+"\n");
+		return result;
 	}
 }
 

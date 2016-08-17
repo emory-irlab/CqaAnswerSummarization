@@ -5,6 +5,14 @@ import java.util.ArrayList;
 import evalPackage.testeval;
 
 public class evaluation {
+	
+	ArrayList<ArrayList<String>> cluster;
+	double alpha;
+	public evaluation(ArrayList<ArrayList<String>> c, double a)
+	{
+		this.cluster = c;
+		this.alpha = a;
+	}
 	/*public double alpha_ndcg_length(int[] order, ArrayList<String> ansSents, 
 			double[] scores, ArrayList<int[]> neggets, int length)
 	{
@@ -21,9 +29,9 @@ public class evaluation {
 		return alpha_ndcgAtLength.alphandcg(sentLength, newScores, newNeggets, length);
 	}*/
 	
-	public double sumEval(String s, ArrayList<ArrayList<String>> cluster, double alpha)
+	public double sumEval(String s)
 	{
-		sumEval_alpha neweval = new sumEval_alpha(alpha);
-		return neweval.performance(s, cluster);
+		sumEval_alpha neweval = new sumEval_alpha(alpha, cluster);
+		return neweval.performance(s);
 	}
 }
