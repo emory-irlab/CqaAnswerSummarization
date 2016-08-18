@@ -43,7 +43,7 @@ public class rankSent {
 		String result = "";
 		List<Integer> temp = new ArrayList<>();
 		for(int x=0;x<allSent.size();x++)  temp.add(x);
-		Collections.shuffle(temp);
+		Collections.shuffle(temp, new Random(1));
 		
 		/*Random rn = new Random(seed);
 		int i=0;

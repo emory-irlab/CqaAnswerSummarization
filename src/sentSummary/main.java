@@ -20,7 +20,7 @@ public class main {
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
-	static int answerLength=100;
+	static int answerLength=1000;
 	static int sentLength = 5;
 	static double lamda = 0;
 	static double alpha = 0.5;
@@ -79,8 +79,9 @@ public class main {
 			//--------------------ranking--------------------
 			rankSent rk = new rankSent(curQuesiton, ansSent, nglocs, answerLength);
 			//String sentAns = rk.random();
-			String sentAns = rk.bm25();
-			//String sentAns = rk.mmr(lamda);
+			
+			//String sentAns = rk.bm25();
+			String sentAns = rk.mmr(lamda);
 			
 			//************best possible answer--greedy*********//
 			String bestAns = rk.best(alpha);
