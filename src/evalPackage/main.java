@@ -1,11 +1,12 @@
 package evalPackage;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
 /*import javax.json.*;
 import javax.json.Json;
@@ -23,11 +24,12 @@ public class main {
 	
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
+	static String bestPerf = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentenceSumBest.txt";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\output.txt";
 	static String qAnsFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\qAnsFile.txt";
 	
-	static int finalLength = 100;
-	static double lamda = 0.1;
+	static int finalLength = 900;
+	static double lamda = 0;
 	static double alpha = 0.5;
 	public static void main(String[] args) throws IOException{
 		
@@ -40,7 +42,9 @@ public class main {
 		ArrayList<String[]> answersCollection = new ArrayList<>();
 		ArrayList<ArrayList<ArrayList<String>>> clusterCollection = new ArrayList<>();		
 
-		/***********************read file**********************************/	
+		/***********************read file**********************************/
+		File f = new File(bestPerf);
+		BufferedReader br = new BufferedReader(new FileReader(f));
 		String rw = readJasonFile.readFile(rawDataSet);
 		String prop = readJasonFile.readFile(clustersProp);	
 		
@@ -139,7 +143,8 @@ public class main {
 			//result.add((double)(aspectsNum)/(aspectsNum2));
 			
 			double score = eval.testEval(finalAns, cluster, alpha);//answer, cluster, alpha
-			double bestScore = eval.testEval(bestAns, cluster, alpha);
+			//double bestScore = eval.testEval(bestAns, cluster, alpha);
+			double bestScore = new Double(br.readLine());
 			double finalscore = score==0?0:(score/bestScore);
 			System.out.println((i+1)+".  "+score+"\tBest: "+bestScore+"\tRatio: "+finalscore);
 			result.add(finalscore);

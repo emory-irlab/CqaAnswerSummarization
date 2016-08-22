@@ -20,13 +20,15 @@ public class main {
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
-	static int answerLength=1000;
+	static String bestPerf = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentenceSumBest.txt";
+	static int answerLength=900;
 	static int sentLength = 5;
 	static double lamda = 0;
 	static double alpha = 0.5;
 	public static void main(String[] args) throws IOException{
 		/**********************out put file******************************/           	  
 	   FileWriter ps1 = write_out(outFile);	//rate and neggets (original order)
+	   FileWriter ps2 = write_out(bestPerf); //used to store the best performance of each q-a summary
 		//**************************used to store all q and a***************************************//
 		ArrayList<String> questionCollection = new ArrayList<>();
 		ArrayList<String[]> answersCollection = new ArrayList<>();
@@ -78,8 +80,7 @@ public class main {
 			ArrayList<ArrayList<ArrayList<int[]>>> nglocs = nglocCollection.get(i); 
 			//--------------------ranking--------------------
 			rankSent rk = new rankSent(curQuesiton, ansSent, nglocs, answerLength);
-			//String sentAns = rk.random();
-			
+			//String sentAns = rk.random();			
 			//String sentAns = rk.bm25();
 			String sentAns = rk.mmr(lamda);
 			
@@ -90,6 +91,7 @@ public class main {
 			evaluation eval = new evaluation(cluster, alpha);
 			double score = eval.sumEval(sentAns);
 			double bestScore = eval.sumEval(bestAns);
+			ps2.append(bestScore+"\n");
 			double ratio = score/bestScore;
 			System.out.println((i+1)+". score: "+score+"; best: "+bestScore+"; ratio: "+ratio);
 			result.add(ratio);
@@ -101,6 +103,7 @@ public class main {
 		}
 	  System.out.println("average£º" + average_eval(result));
       ps1.close();
+      ps2.close();
       System.out.println("finishied!");
 	}
 
@@ -109,10 +112,10 @@ public class main {
 		File outfile = new File(Path);
 		if(outfile.exists())
 		{
-			System.out.println("deleting...");
+			System.out.println("deleting..."+ Path);
 			outfile.delete();
 		}
-		System.out.println("buiding new file");
+		System.out.println("buiding new file" + Path);
 	  	try{
 	  		outfile.createNewFile();
 	  	}catch (IOException e){e.printStackTrace();}            	  
