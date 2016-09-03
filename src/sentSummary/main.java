@@ -12,6 +12,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import edu.stanford.nlp.simple.*;
+import evalPackage.eval;
 import evalPackage.ranking;
 //import evalPackage.ranking;
 import evalPackage.readJasonFile;
@@ -19,9 +20,9 @@ import evalPackage.readJasonFile;
 public class main {	
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
-	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentSummary.txt";
-	static String bestPerf = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentenceSumBest.txt";
-	static int answerLength=900;
+	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sent_rand_1000_5.txt";
+	static String bestPerf = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentBest_100_5.txt";
+	static int answerLength=1000;
 	static int sentLength = 5;
 	static double lamda = 0;
 	static double alpha = 0.5;
@@ -68,7 +69,53 @@ public class main {
 			print += tmp;
 		}
 		System.out.println(print/r.length);*/
-		//*******work
+		//find lamda
+/*		
+		ArrayList<Double[]> tempResult = new ArrayList<>();
+		for(int i=0; i<questionCollection.size();i++)
+		{
+			String curQuesiton = questionCollection.get(i);		
+			ArrayList<ArrayList<String>> ansSent = ansSentCollection.get(i);
+			ArrayList<ArrayList<ArrayList<int[]>>> nglocs = nglocCollection.get(i); 
+			ArrayList<ArrayList<String>> cluster = clusterCollection.get(i);
+			
+			rankSent rk = new rankSent(curQuesiton, ansSent, nglocs, answerLength);
+			evaluation eval = new evaluation(cluster, alpha);
+			String bestAns = rk.best(alpha);
+			double bestScore = eval.sumEval(bestAns);
+			Double[] tempArray = new Double[11];
+			for(int l=0; l<=10; l++)
+			{
+				String sentAns = rk.mmr((double)l/10.0);				
+				double score = eval.sumEval(sentAns);
+				tempArray[l] = score/bestScore;
+			}
+			tempResult.add(tempArray);
+		}
+		double[] average = new double[11];
+		for(int i=0; i<tempResult.size(); i++)
+		{
+			Double[] tempArray = tempResult.get(i);
+			for(int l=0; l<=10; l++)
+			{
+				average[l] += tempArray[l];
+			}
+		}
+		double maxLamda = 0;
+		double max = 0;
+		for(int l=0; l<=10; l++)
+		{
+			average[l] = average[l]/tempResult.size();
+			if(average[l] > max)
+			{
+				max = average[l];
+				maxLamda = (double)l/10.0;
+			}
+		}
+		
+		lamda = maxLamda;
+		//find lamda end
+*/		//*******work
 		ArrayList<Double> result = new ArrayList<>();
 		for(int i=0; i<questionCollection.size();i++)//every single question in the dataset
 		{
@@ -80,9 +127,9 @@ public class main {
 			ArrayList<ArrayList<ArrayList<int[]>>> nglocs = nglocCollection.get(i); 
 			//--------------------ranking--------------------
 			rankSent rk = new rankSent(curQuesiton, ansSent, nglocs, answerLength);
-			//String sentAns = rk.random();			
+			String sentAns = rk.random(1);			
 			//String sentAns = rk.bm25();
-			String sentAns = rk.mmr(lamda);
+			//String sentAns = rk.mmr(lamda);
 			
 			//************best possible answer--greedy*********//
 			String bestAns = rk.best(alpha);
@@ -96,15 +143,15 @@ public class main {
 			System.out.println((i+1)+". score: "+score+"; best: "+bestScore+"; ratio: "+ratio);
 			result.add(ratio);
 			ps1.append("Question "+(i+1)+". "+stringProcess(curQuesiton)+"\tscore: "+ratio+"\n");
-			ps1.append("----Answer: "+stringProcess(sentAns)+"\n");
+			ps1.append("----Answer: "+stringProcess(sentAns));
 			stringAspects(sentAns, cluster, ps1);
-			ps1.append("----Best  : "+stringProcess(bestAns)+"\n");
+			ps1.append("----Best  : "+stringProcess(bestAns));
 			stringAspects(bestAns, cluster, ps1);
 		}
 	  System.out.println("average£º" + average_eval(result));
       ps1.close();
       ps2.close();
-      System.out.println("finishied!");
+      System.out.println("lamda: "+lamda+"; finishied!");
 	}
 
 	public static FileWriter write_out(String Path) throws IOException
@@ -312,11 +359,12 @@ public class main {
 			{
 				if(s.contains(aspect.get(j)))
 				{
-					ps.append("  >>> " + aspect.get(j) + "\n");
+					ps.append("\t(" + aspect.get(j) + ")");
 					result++;
 					break;
 				}
 			}
+			ps.append("\n");
 		}		
 		return result;
 	}

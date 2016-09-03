@@ -3,6 +3,8 @@ package evalPackage;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 public class ranking {
@@ -39,6 +41,30 @@ public class ranking {
 			order[i++] = temp.remove((int)rn.nextInt(x));
 		return order;
 	}
+	
+	public static String randString(String question, String[] anwsers, int seed, int finalLength)
+	{
+		String result = "";
+		
+		List<Integer> temp = new ArrayList<>();
+		for(int x=0;x<anwsers.length;x++)  temp.add(x);
+		Collections.shuffle(temp, new Random(seed));
+		
+		int diff = finalLength;
+		for(int i=0; i<anwsers.length; i++)
+		{
+			int nxt = temp.get(i);
+			result += anwsers[nxt]+" ";
+			diff -= anwsers[nxt].length()+1;
+			if(diff<=0) 
+			{
+				result = result.substring(0,finalLength);
+				break;
+			}
+		}		
+		return result;
+	}
+	
 	public static int[] mmr(String question, String[] anwsers, double lamda) throws IOException
 	{
 		myBM25 rk = new myBM25(question, anwsers);
@@ -50,7 +76,7 @@ public class ranking {
 	
 	public static String mmr_loc(String question, String[] anwsers, double lamda, int length) throws IOException
 	{
-		BM25_loc rk = new BM25_loc(question, anwsers, length);
+		BM25_loc rk = new BM25_loc(question, anwsers, length);		
 		return rk.mmr_bm25based(lamda);		
 	}
 

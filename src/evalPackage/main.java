@@ -24,12 +24,12 @@ public class main {
 	
 	static String rawDataSet = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.text.json";
 	static String clustersProp = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\ydata-110_examples.relevant_propositions.json";
-	static String bestPerf = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\sentenceSumBest.txt";
+	static String bestPerf = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\textresult\\bestPerf-score\\0.5\\sentBest_1000_5.txt";
 	static String outFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\output.txt";
-	static String qAnsFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\qAnsFile.txt";
+	static String qAnsFile = "E:\\CScourse\\summer_project\\dataset\\Webscope_L29\\outfile\\ans_rand_1000_5.txt";
 	
-	static int finalLength = 900;
-	static double lamda = 0;
+	static int finalLength = 200;
+	static double lamda = 0.1;
 	static double alpha = 0.5;
 	public static void main(String[] args) throws IOException{
 		
@@ -91,8 +91,49 @@ public class main {
 			}
 			
 		}*/
+		//choose lamda	
+		ArrayList<Double[]> tempResult = new ArrayList<>();
+		for(int i=0; i<questionCollection.size();i++)
+		{
+			String curQuesiton = questionCollection.get(i);
+			String[] curAnswers = answersCollection.get(i);
+			ArrayList<ArrayList<int[]>> ngLocs = ngLocCollection.get(i);
+			ArrayList<ArrayList<String>> cluster = clusterCollection.get(i);
+			String bestAns = ranking.best(ngLocs, curAnswers, finalLength, alpha);
+			double bestScore = eval.testEval(bestAns, cluster, alpha);
+			Double[] tempArray = new Double[11];
+			for(int l=0; l<=10; l++)
+			{
+				String finalAns = ranking.mmr_loc(curQuesiton, curAnswers, (double)l/10.0, finalLength);				
+				double score = eval.testEval(finalAns, cluster, alpha);//answer, cluster, alpha
+				tempArray[l] = score/bestScore;
+			}
+			tempResult.add(tempArray);
+		}
+		double[] average = new double[11];
+		for(int i=0; i<tempResult.size(); i++)
+		{
+			Double[] tempArray = tempResult.get(i);
+			for(int l=0; l<=10; l++)
+			{
+				average[l] += tempArray[l];
+			}
+		}
+		double maxLamda = 0;
+		double max = 0;
+		for(int l=0; l<=10; l++)
+		{
+			average[l] = average[l]/tempResult.size();
+			if(average[l] > max)
+			{
+				max = average[l];
+				maxLamda = (double)l/10.0;
+			}
+		}
 		
-		
+		lamda = maxLamda;
+		//choose lamda end
+	
 		//*******work
 		ArrayList<Double> result = new ArrayList<>();
 		ArrayList<Double> bestResult = new ArrayList<>();
@@ -107,44 +148,33 @@ public class main {
 			
 			//***************ranking*******************//
 			//int[] order = ranking.random(curQuesiton, curAnswers, 1);//random--seed
+			String finalAns = ranking.randString(curQuesiton, curAnswers, 1, finalLength);
           	//int[] order = ranking.bm25(curQuesiton, curAnswers);//bm25
 			//String finalAns = ranking.bm25_loc(curQuesiton, curAnswers, finalLength);
             //int[] order = ranking.mmr(curQuesiton, curAnswers, lamda);//mmr lamda	
-			String finalAns = ranking.mmr_loc(curQuesiton, curAnswers, lamda, finalLength);
+			//String finalAns = ranking.mmr_loc(curQuesiton, curAnswers, lamda, finalLength);
 
 			
 			//************best possible answer--greedy*********//		
 			String bestAns = ranking.best(ngLocs, curAnswers, finalLength, alpha);
-			/*for(int j=0; j<bestOrder.length; j++)			
-				System.out.print(bestOrder[j]+", ");			
-			System.out.print("\n");*/
-			
 			
 			//******merge complete answer************//
 			ps2.append("QUESTION No."+(1+i)+"\t"+stringProcess(curQuesiton)+"\n");
-			ps2.append("++++ANS: ");
+			ps2.append("++ANS: ");
 			//String finalAns = mergingAnswer(ps2, curAnswers, order, finalLength);
-			ps2.append(stringProcess(finalAns)+"\n");
+			ps2.append(stringProcess(finalAns));
 
-			
-			
-/*			//how many apsect this merged answer contains
-			ArrayList<ArrayList<String>> cluster = clusterCollection.get(i);
-			int aspectsNum = stringAspects(answerString, cluster);
-			double ttttt = (double)aspectsNum/cluster.size();
-			System.out.println((i+1)+". aspects£º" + aspectsNum+"; total: "+cluster.size()+"; percentage: "+ ttttt);
-			result.add(ttttt);*/
 			int aspectsNum = stringAspects(finalAns, cluster, ps2);
 			
-			ps2.append("++++BST: "+stringProcess(bestAns)+"\n");
+			ps2.append("++BST: "+stringProcess(bestAns));
 			//String bestAns = mergingAnswer(ps2, curAnswers, bestOrder, finalLength);			
 			int aspectsNum2 = stringAspects(bestAns, cluster, ps2);
 			//System.out.println(i+".  "+aspectsNum+"\tBest: "+aspectsNum2);
 			//result.add((double)(aspectsNum)/(aspectsNum2));
 			
 			double score = eval.testEval(finalAns, cluster, alpha);//answer, cluster, alpha
-			//double bestScore = eval.testEval(bestAns, cluster, alpha);
-			double bestScore = new Double(br.readLine());
+			double bestScore = eval.testEval(bestAns, cluster, alpha);
+			//double bestScore = new Double(br.readLine());
 			double finalscore = score==0?0:(score/bestScore);
 			System.out.println((i+1)+".  "+score+"\tBest: "+bestScore+"\tRatio: "+finalscore);
 			result.add(finalscore);
@@ -169,8 +199,8 @@ public class main {
 		}
 		double ffff = average_eval(result);
 		System.out.println("average£º" + ffff);
-		System.out.println("best£º" + average_eval(bestResult));
-		ps2.append("\nscore: "+ ffff + "; alpha: 0.5; "+"random; Length: "+finalLength);
+		//System.out.println("best£º" + average_eval(bestResult));
+		ps2.append("\ncomplete answer. Score: "+ ffff + "; Alpha: "+alpha+"; Length: "+finalLength);
       ps1.close();
       ps2.close();
       /*add
@@ -180,7 +210,7 @@ public class main {
       for(int i=0; i<rrrr.length; i++)  sum += rrrr[i]; 
       System.out.println("average£º" + sum/rrrr.length);
       */
-      System.out.println("finishied!");
+      System.out.println("lamda = "+lamda+"; finishied!");
 	}
 
 	public static int stringAspects(String s, ArrayList<ArrayList<String>> cluster, FileWriter ps) throws IOException
@@ -194,12 +224,13 @@ public class main {
 			{
 				if(s.contains(aspect.get(j)))
 				{
-					ps.append("  >>> " + aspect.get(j) + "\n");
+					ps.append("\t(" + aspect.get(j) + ")");
 					result++;
 					break;
 				}
 			}
-		}		
+		}
+		ps.append("\n");
 		return result;
 	}
 
@@ -328,11 +359,8 @@ public class main {
 						int addLength = start==-1?0:p.length();
 						loc[l] = ans.indexOf(p) + addLength;//end
 					}
-					if(negget[k]!=0)
-					{
-						count++;
-						ngLoc.add(loc);
-					}
+					if(negget[k]!=0) count++;
+					ngLoc.add(loc);
 				}
 				rate[j] = count;
 				neggets.add(negget);

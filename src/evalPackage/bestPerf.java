@@ -10,6 +10,7 @@ public class bestPerf {
 	int ansLength;
 	ArrayList<ArrayList<int[]>> ngLocs;
 	double alpha;
+	int[] aspect;
 	
 	public bestPerf(ArrayList<ArrayList<int[]>> n, String[] a, int l, double al)
 	{
@@ -17,6 +18,7 @@ public class bestPerf {
 		this.ngLocs = n;
 		this.answers = a;
 		this.alpha = al;
+		this.aspect = new int[ngLocs.get(0).size()];
 	}
 	
 	public String rank()
@@ -26,13 +28,12 @@ public class bestPerf {
 		for(int i=0; i<ngLocs.size(); i++)
 			remain.add(i);
 		int diff = ansLength;
-		int i=0;
 		double max = 0;
 		int nxt = 0 ;
 		while(!remain.isEmpty())
 		{			
-			nxt = remain.get(0);
-			max = rate(answers[nxt], diff, ngLocs.get(nxt));
+			nxt = -1;
+			max = -1;
 			for(int j=0; j<remain.size(); j++)
 			{
 				int cur = remain.get(j);
@@ -43,7 +44,7 @@ public class bestPerf {
 					max = curRate;
 				}
 			}
-			if(diff > answers[nxt].length())
+			/*if(diff > answers[nxt].length())
 			{
 				result += answers[nxt] + " ";
 				diff = diff - answers[nxt].length() - 1;
@@ -51,6 +52,33 @@ public class bestPerf {
 			else
 			{
 				result += answers[nxt].substring(0, diff);
+				break;
+			}
+			remain.remove(new Integer(nxt));*/
+			if(diff > answers[nxt].length())
+			{
+				ArrayList<int[]> ngloc = ngLocs.get(nxt);//update aspect[]
+				for(int k=0; k<ngloc.size(); k++)
+				{
+					int[] loc = ngloc.get(k);
+					for(int t: loc)
+						if(t>0 && t<=diff) aspect[k]++;
+				}
+				result += answers[nxt] + " ";
+				diff = diff - answers[nxt].length() - 1;
+			}
+			else
+			{
+				ArrayList<int[]> ngloc = ngLocs.get(nxt);//update aspect[]
+				for(int k=0; k<ngloc.size(); k++)
+				{
+					int[] loc = ngloc.get(k);
+					for(int t: loc)
+						if(t>0 && t<=diff) aspect[k]++;
+				}
+				String sub = answers[nxt].substring(0, diff);
+				
+				result += sub;
 				break;
 			}
 			remain.remove(new Integer(nxt));
@@ -64,11 +92,10 @@ public class bestPerf {
 		for(int i=0; i<ngloc.size(); i++)
 		{
 			int[] loc = ngloc.get(i);
-			int num=0;
 			for(int j=0; j<loc.length;j++)
 			{
 				if(loc[j]>0 && loc[j]<=length)
-					score += Math.pow((1-alpha), num++);
+					score += Math.pow((1-alpha), aspect[i]);
 			}
 		}
 		return score;

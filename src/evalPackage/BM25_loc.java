@@ -138,8 +138,10 @@ public class BM25_loc {
 				{
 					int tmpInd = selected.get(j);
 					max = Math.max(max, bm25Similarity(answerList.get(curInd),answerList.get(tmpInd), alength[tmpInd], avgdl, diff));
-				}
-				double mSim = lamda*qaSim-(1-lamda)*max;
+				}				
+				double mSim;
+				if(lamda==0 && unselect.size()==answers.length) mSim = qaSim;
+				else mSim = lamda*qaSim-(1-lamda)*max;
 				if(mSim >= maxDiScore)
 				{
 					maxDiScore = mSim;

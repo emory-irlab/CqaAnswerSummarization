@@ -38,12 +38,12 @@ public class rankSent {
 		}		
 	}
 	
-	public String random()
+	public String random(int seed)
 	{	
 		String result = "";
 		List<Integer> temp = new ArrayList<>();
 		for(int x=0;x<allSent.size();x++)  temp.add(x);
-		Collections.shuffle(temp, new Random(1));
+		Collections.shuffle(temp, new Random(seed));
 		
 		/*Random rn = new Random(seed);
 		int i=0;
